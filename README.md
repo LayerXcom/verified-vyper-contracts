@@ -37,6 +37,7 @@ $ .build/evm-semantics/kevm prove specs/<project>/<target>-spec.k
 
 where `<project>/<target>` is the target contract (or function) to verify.
 
+NOTE: This project is using WIP K version and you can use the options described [here](https://github.com/runtimeverification/verified-smart-contracts/blob/master/resources/kprove-tutorial.md#kprove-logging-options).
 
 ## References
 This project is based on K Framework and Runtime Verification's works. See [their resources](https://github.com/runtimeverification/verified-smart-contracts/blob/master/README.md#resources) for the details of KEVM and background knowledge.

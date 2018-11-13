@@ -18,3 +18,5 @@ The eDSL consists of two parts:
 [KEVM]: <https://github.com/kframework/evm-semantics>
 [K-framework]: <http://www.kframework.org>
 [reachability logic theorem prover]: <http://fsl.cs.illinois.edu/index.php/Semantics-Based_Program_Verifiers_for_All_Languages>
+
+## NOTE: LayerX
