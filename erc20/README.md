@@ -5,3 +5,9 @@ The code is based on [the test contracts](https://github.com/Uniswap/contracts-v
 
 ## Vyper Version
 `0.1.0b4`
+
+## Verification
+We verified runtime bytecode compiled with this command.
+```
+vyper -f bytecode_runtime ERC20.vy 
+```
