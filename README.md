@@ -39,5 +39,12 @@ where `<project>/<target>` is the target contract (or function) to verify.
 
 NOTE: This project is using WIP K version and you can use the options described [here](https://github.com/runtimeverification/verified-smart-contracts/blob/master/resources/kprove-tutorial.md#kprove-logging-options).
 
+
+#### Modifying `hashedLocation`
+Fow now, `#hashedLocation` rule in [edsl.md](https://github.com/kframework/evm-semantics/blob/e6c4b961495768a429fcffaa81418472953c8568/edsl.md#hashed-location-for-storage) of KEVM is not correct for the latest Vyper storage layout. Therefore, you need to modify that manually as follows: 
+```
+rule #hashedLocation("Vyper", BASE, OFFSET OFFSETS) => #hashedLocation("Vyper", keccakIntList(BASE OFFSET), OFFSETS)
+```
+
 ## References
 This project is based on K Framework and Runtime Verification's works. See [their resources](https://github.com/runtimeverification/verified-smart-contracts/blob/master/README.md#resources) for the details of KEVM and background knowledge.
