@@ -17,7 +17,7 @@ make all
 
 ## Instruction
 
-The formal specifications presented in this repository are written in [eDSL], a domain-specific language for EVM specifications.
+The formal specifications presented in this repository are written in [eDSL](https://github.com/runtimeverification/verified-smart-contracts/blob/master/resources/edsl.md), a domain-specific language for EVM specifications.
 
 #### Generating Full Reachability Logic Specifications
 
