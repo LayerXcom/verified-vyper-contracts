@@ -60,18 +60,29 @@ $(specs_dir)/lemmas.k: resources/lemmas.md $(TANGLER)
 # Spec Files
 # ----------
 
-vyper_files:= # TODO: add files
+erc20_files:=totalSupply-spec.k \
+             balanceOf-spec.k \
+             allowance-spec.k \
+             approve-spec.k \
+             transfer-success-1-spec.k \
+             transfer-success-2-spec.k \
+             transfer-failure-1-spec.k \
+             transfer-failure-2-spec.k \
+             transferFrom-success-1-spec.k \
+             transferFrom-success-2-spec.k \
+             transferFrom-failure-1-spec.k \
+             transferFrom-failure-2-spec.k
 
-vyper: $(patsubst %, $(specs_dir)/vyper/%, $(vyper_files)) $(specs_dir)/lemmas.k
+erc20: $(patsubst %, $(specs_dir)/erc20/%, $(erc20_files)) $(specs_dir)/lemmas.k
 
-vyper_tmpls:=vyper/module-tmpl.k vyper/spec-tmpl.k
+erc20_tmpls:=erc20/module-tmpl.k erc20/spec-tmpl.k
 
- $(specs_dir)/vyper/%-spec.k: $(vyper_tmpls) vyper/vyper-spec.ini
+ $(specs_dir)/erc20/%-spec.k: $(erc20_tmpls) erc20/erc20-spec.ini
 	@echo >&2 "==  gen-spec: $@"
 	mkdir -p $(dir $@)
 	python3 resources/gen-spec.py $^ $* $* > $@
-	cp vyper/abstract-semantics.k $(dir $@)
-	cp vyper/verification.k $(dir $@)
+	cp erc20/abstract-semantics.k $(dir $@)
+	cp erc20/verification.k $(dir $@)
 
 # Testing
 # -------

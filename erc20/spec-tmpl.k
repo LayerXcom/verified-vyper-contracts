@@ -23,7 +23,7 @@
 
           <callData> {CALLDATA} </callData>
 
-          <callValue> {CALLVALUE} </callValue>
+          <callValue> 0 </callValue>
           <wordStack> .WordStack => _ </wordStack>
           <localMem> .Map => _ </localMem>
           <pc> 0 => _ </pc>
@@ -55,7 +55,7 @@
         <number> _ </number>
         <gasLimit> _ </gasLimit>
         <gasUsed> _ </gasUsed>
-        <timestamp> TIME_STAMP </timestamp>
+        <timestamp> _ </timestamp>
         <extraData> _ </extraData>
         <mixHash> _ </mixHash>
         <blockNonce> _ </blockNonce>
@@ -65,17 +65,18 @@
       </evm>
 
       <network>
-        <activeAccounts> SetItem(ACCT_ID) ACCTS:Set </activeAccounts>
+        <activeAccounts> SetItem(ACCT_ID) _:Set </activeAccounts>
 
         <accounts>
           <account>
             <acctID> ACCT_ID </acctID>
-            <balance> {BALANCE} </balance>
+            <balance> _ </balance>
             <code> #parseByteStack({CODE}) </code>
             <storage>
               {STORAGE}
             </storage>
-            <nonce> ACCT_NONCE </nonce>
+            <origStorage> _ </origStorage>
+            <nonce> _ </nonce>
           </account>
        // ... // TODO: fix
         </accounts>
@@ -89,6 +90,5 @@
      andBool 0 <=Int CALLER_ID  andBool CALLER_ID  <Int (2 ^Int 160)
      andBool 0 <=Int ORIGIN_ID  andBool ORIGIN_ID  <Int (2 ^Int 160)
      andBool 0 <=Int CALL_DEPTH andBool CALL_DEPTH <Int 1024
-     andBool 0 <=Int TIME_STAMP andBool TIME_STAMP <Int (2 ^Int 256)
-     andBool 0 <=Int ACCT_NONCE andBool ACCT_NONCE <Int (2 ^Int 64)
      {REQUIRES}
+     
