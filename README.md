@@ -32,7 +32,7 @@ $ make <project>  // e.g. make erc20
 To prove that the specifications are satisfied by (the compiled EVM bytecode of) the target contracts, run the EVM verifier as follows:
 
 ```
-$ .build/evm-semantics/kevm prove specs/<project>/<target>-spec.k
+$ make specs/<project>/<target>-spec.k.test // e.g. make specs/erc20/allowance-spec.k.test
 ```
 
 where `<project>/<target>` is the target contract (or function) to verify.
