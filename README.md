@@ -37,8 +37,12 @@ $ make specs/<project>/<target>-spec.k.test // e.g. make specs/erc20/allowance-s
 
 where `<project>/<target>` is the target contract (or function) to verify.
 
-NOTE: This project is using WIP K version and you can use the options described [here](https://github.com/runtimeverification/verified-smart-contracts/blob/master/resources/kprove-tutorial.md#kprove-logging-options).
+This project is using WIP K version and you can use the options described [here](https://github.com/runtimeverification/verified-smart-contracts/blob/master/resources/kprove-tutorial.md#kprove-logging-options).
 
+NOTE: The above command executes the following command:
+```
+.build/k/k-distribution/target/release/k/bin/kprove -v -d .build/evm-semantics/.build/java -m VERIFICATION --z3-executable --z3-impl-timeout 500 specs/<project>/<target>-spec.k
+```
 
 #### Modifying `hashedLocation`
 Fow now, `#hashedLocation` rule in [edsl.md](https://github.com/kframework/evm-semantics/blob/e6c4b961495768a429fcffaa81418472953c8568/edsl.md#hashed-location-for-storage) of KEVM is not correct for the latest Vyper storage layout. Therefore, you need to modify that manually as follows: 
