@@ -1,4 +1,4 @@
-# verified-vyper-contracts
+# FVyper
 Formally Verified Vyper Contracts
 
 ## How to get started
