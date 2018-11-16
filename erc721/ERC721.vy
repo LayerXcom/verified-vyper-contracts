@@ -66,7 +66,11 @@ minter: address
 # @dev Mapping of interface id to whether or not it's supported
 supportedInterfaces: bool[bytes[4]]
 
+# @dev ERC165 Interface ID of ERC721 
 INTERFACE_ID_ERC721: constant(bytes[4]) = '\x80\xac\x58\xcd'
+
+# @dev First 4 bytes of keccak256("onERC721Received(address,address,uint256,bytes)"))
+ERC721_RECEIVED: constant(bytes[4]) = '\x15\x0b\x7a\x02'
 
 # @dev Contract constructor. Per the Transfer event spec; during contract creation, any number of
 #      NFTs may be created and assigned without emitting Transfer.
