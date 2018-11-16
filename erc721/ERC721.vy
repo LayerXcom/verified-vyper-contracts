@@ -2,7 +2,7 @@
 # Modified from: https://github.com/ethereum/vyper/blob/master/examples/tokens/ERC721.vy
 
 # Interface for the contract called by safeTransferFrom()
-contract NFTReceiver:
+contract ERC721Receiver:
     def onERC721Received(
             _operator: address,
             _from: address,
