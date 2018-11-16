@@ -66,7 +66,7 @@ minter: address
 # @dev Mapping of interface id to whether or not it's supported
 supportedInterfaces: bool[bytes[4]]
 
-# @dev ERC165 Interface ID of ERC721 
+# @dev ERC165 interface ID of ERC721 
 INTERFACE_ID_ERC721: constant(bytes[4]) = '\x80\xac\x58\xcd'
 
 # @dev First 4 bytes of keccak256("onERC721Received(address,address,uint256,bytes)"))
