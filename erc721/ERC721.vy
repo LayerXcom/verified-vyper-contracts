@@ -1,4 +1,5 @@
 # @dev Implementation of ERC-721 non-fungible token standard.
+# Modified from: https://github.com/ethereum/vyper/blob/master/examples/tokens/ERC721.vy
 
 # Interface for the contract called by safeTransferFrom()
 contract NFTReceiver:
