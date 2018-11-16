@@ -60,8 +60,8 @@ ownerToNFTokenCount: uint256[address]
 # @dev Mapping from owner address to mapping of operator addresses.
 ownerToOperators: (bool[address])[address]
 
-# @dev The owner of this contract
-contractOwner: address
+# @dev Address of minter, who can mint a token
+minter: address
 
 # @dev Mapping of interface id to whether or not it's supported
 supportedInterfaces: bool[bytes[4]]
@@ -76,7 +76,7 @@ def __init__(_recipients: address[64], _tokenIds: uint256[64]):
         self.idToOwner[_tokenIds[i]] = _recipients[i]
         self.ownerToNFTokenCount[_recipients[i]] += 1
     self.supportedInterfaces[INTERFACE_ID_ERC721] = True
-    self.contractOwner = msg.sender
+    self.minter = msg.sender
 
 
 # @dev Returns the number of NFTs owned by `_owner`. NFTs assigned to the zero address are
@@ -245,7 +245,7 @@ def supportsInterface(_interfaceID: bytes[4]) -> bool:
 @public
 def mint(_to: address, _tokenId: uint256) -> bool:
     assert _to != ZERO_ADDRESS
-    assert msg.sender == self.contractOwner
+    assert msg.sender == self.minter
     assert self.idToOwner[_tokenId] == ZERO_ADDRESS
     self.idToOwner[_tokenId] = _to
     self.ownerToNFTokenCount[_to] += 1
@@ -257,7 +257,7 @@ def mint(_to: address, _tokenId: uint256) -> bool:
 @public
 def burn(_tokenId: uint256):
     owner: address = self.ownerOf(_tokenId)
-    assert owner == msg.sender or self.contractOwner == msg.sender
+    assert owner == msg.sender or self.minter == msg.sender
     if (self.idToApprovals[_tokenId] != ZERO_ADDRESS):
         self.idToApprovals[_tokenId] = ZERO_ADDRESS
     self.ownerToNFTokenCount[owner] -= 1
