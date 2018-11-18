@@ -72,13 +72,9 @@ INTERFACE_ID_ERC721: constant(bytes[4]) = '\x80\xac\x58\xcd'
 # @dev First 4 bytes of keccak256("onERC721Received(address,address,uint256,bytes)"))
 ERC721_RECEIVED: constant(bytes[4]) = '\x15\x0b\x7a\x02'
 
-# @dev Contract constructor. Per the Transfer event spec; during contract creation, any number of
-#      NFTs may be created and assigned without emitting Transfer.
+# @dev Contract constructor.
 @public
-def __init__(_recipients: address[64], _tokenIds: uint256[64]):
-    for i in range(64):
-        self.idToOwner[_tokenIds[i]] = _recipients[i]
-        self.ownerToNFTokenCount[_recipients[i]] += 1
+def __init__():
     self.supportedInterfaces[INTERFACE_ID_ERC721] = True
     self.minter = msg.sender
 
