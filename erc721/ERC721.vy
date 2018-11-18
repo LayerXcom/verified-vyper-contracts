@@ -152,21 +152,37 @@ def _isApprovedOrOwner(_spender: address, _tokenId: uint256) -> bool:
 def _validateTransferFrom(_from: address, _to: address, _tokenId: uint256, _sender: address):
     assert self._isApprovedOrOwner(_sender, _tokenId)
     # Check that _to and _from are valid addresses
-    assert _from != ZERO_ADDRESS
+    assert _from != ZERO_ADDRESS # NOTE: Is this necessary?
     assert _to != ZERO_ADDRESS
-    # Throws if `_from` is not the current owner
-    assert self.idToOwner[_tokenId] == _from
 
+@private
+def _addTokenTo(_to: address, _tokenId: uint256):
+    assert self.idToOwner[_tokenId] == ZERO_ADDRESS
+    # Change the owner
+    self.idToOwner[_tokenId] = _to
+    # Change count tracking
+    self.ownerToNFTokenCount[_to] += 1
+
+@private
+def _removeTokenFrom(_from: address, _tokenId: uint256):
+    assert self.idToOwner[_tokenId] == _from
+    # Change the owner
+    self.idToOwner[_tokenId] = _from
+    # Change count tracking
+    self.ownerToNFTokenCount[_from] -= 1
+
+@private
+def _clearApproval(_owner: address, _tokenId: uint256):
+    assert self.idToOwner[_tokenId] == _owner
+    if self.idToApprovals[_tokenId] != ZERO_ADDRESS:
+        # Reset approvals
+        self.idToApprovals[_tokenId] = ZERO_ADDRESS
 
 @private
 def _doTransfer(_from: address, _to: address, _tokenId: uint256):
-    # Change the owner
-    self.idToOwner[_tokenId] = _to
-    # Reset approvals
-    self.idToApprovals[_tokenId] = ZERO_ADDRESS
-    # Change count tracking
-    self.ownerToNFTokenCount[_to] += 1
-    self.ownerToNFTokenCount[_from] -= 1
+    self._clearApproval(_from, _tokenId)
+    self._removeTokenFrom(_from, _tokenId)
+    self._addTokenTo(_to, _tokenId)
     # Log the transfer
     log.Transfer(_from, _to, _tokenId)
 
@@ -258,11 +274,9 @@ def supportsInterface(_interfaceID: bytes[4]) -> bool:
 # @return A boolean that indicates if the operation was successful.
 @public
 def mint(_to: address, _tokenId: uint256) -> bool:
-    assert _to != ZERO_ADDRESS
     assert msg.sender == self.minter
-    assert self.idToOwner[_tokenId] == ZERO_ADDRESS
-    self.idToOwner[_tokenId] = _to
-    self.ownerToNFTokenCount[_to] += 1
+    assert _to != ZERO_ADDRESS
+    self._addTokenTo(_to, _tokenId)
     log.Transfer(ZERO_ADDRESS, _to, _tokenId)
     return True
 
@@ -270,10 +284,8 @@ def mint(_to: address, _tokenId: uint256) -> bool:
 # @param tokenId uint256 id of the ERC721 token to be burned.
 @public
 def burn(_tokenId: uint256):
+    assert self._isApprovedOrOwner(msg.sender, _tokenId)
     owner: address = self.ownerOf(_tokenId)
-    assert owner == msg.sender or self.minter == msg.sender
-    if (self.idToApprovals[_tokenId] != ZERO_ADDRESS):
-        self.idToApprovals[_tokenId] = ZERO_ADDRESS
-    self.ownerToNFTokenCount[owner] -= 1
-    self.idToOwner[_tokenId] = ZERO_ADDRESS
+    self._clearApproval(owner, _tokenId)
+    self._removeTokenFrom(owner, _tokenId)
     log.Transfer(owner, ZERO_ADDRESS, _tokenId)
