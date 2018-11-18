@@ -225,9 +225,6 @@ def getApproved(_tokenId: uint256) -> address:
 @public
 @constant
 def isApprovedForAll( _owner: address, _operator: address) -> bool:
-    # TODO: check original for _owner == 0x0
-    if (_owner == ZERO_ADDRESS):
-        return False
     return (self.ownerToOperators[_owner])[_operator]
 
 # @dev implement supportsInterface(bytes4) using a lookup table
