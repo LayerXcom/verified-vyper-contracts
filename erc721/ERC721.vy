@@ -63,7 +63,7 @@ ownerToOperators: (bool[address])[address]
 # @dev Address of minter, who can mint a token
 minter: address
 
-# @dev Mapping of interface id to whether or not it's supported
+# @dev Mapping of interface id to bool about whether or not it's supported
 supportedInterfaces: bool[bytes[4]]
 
 # @dev ERC165 interface ID of ERC721 
@@ -101,7 +101,6 @@ def balanceOf(_owner: address) -> uint256:
 def ownerOf(_tokenId: uint256) -> address:
     assert self.idToOwner[_tokenId] != ZERO_ADDRESS
     return self.idToOwner[_tokenId]
-
 
 ### TRANSFER FUNCTION HELPERS ###
 
