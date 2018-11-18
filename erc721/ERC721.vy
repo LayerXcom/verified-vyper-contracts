@@ -95,8 +95,9 @@ def balanceOf(_owner: address) -> uint256:
 @public
 @constant
 def ownerOf(_tokenId: uint256) -> address:
-    assert self.idToOwner[_tokenId] != ZERO_ADDRESS
-    return self.idToOwner[_tokenId]
+    owner: address = self.idToOwner[_tokenId]
+    assert owner != ZERO_ADDRESS
+    return owner
 
 ### TRANSFER FUNCTION HELPERS ###
 
