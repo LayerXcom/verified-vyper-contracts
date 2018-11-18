@@ -95,32 +95,31 @@ def balanceOf(_owner: address) -> uint256:
 @public
 @constant
 def ownerOf(_tokenId: uint256) -> address:
+    return self._ownerOf(_tokenId)
+
+@private
+@constant
+def _ownerOf(_tokenId: uint256) -> address:
     owner: address = self.idToOwner[_tokenId]
     assert owner != ZERO_ADDRESS
     return owner
 
+
 ### TRANSFER FUNCTION HELPERS ###
 
-# NOTE: as VYPER uses a new message call for a function call, I needed to pass `_sender: address`
-#       rather than use msg.sender
 # @dev Throws unless `msg.sender` is the current owner, an authorized operator, or the approved
 #      address for this NFT.
 # Throws if `_from` is not the current owner.
 # Throws if `_to` is the zero address.
 # Throws if `_tokenId` is not a valid NFT.
 @private
-def _validateTransferFrom(_from: address, _to: address, _tokenId: uint256, _sender: address):
+def _validateTransferFrom(_from: address, _to: address, _tokenId: uint256):
+    assert self._isApprovedOrOwner(msg.sender, _tokenId)
     # Check that _to and _from are valid addresses
     assert _from != ZERO_ADDRESS
     assert _to != ZERO_ADDRESS
     # Throws if `_from` is not the current owner
     assert self.idToOwner[_tokenId] == _from
-    # Throws unless `msg.sender` is the current owner, an authorized operator, or the approved
-    # address for this NFT.
-    senderIsOwner: bool = self.idToOwner[_tokenId] == _sender
-    senderIsApproved: bool = self.idToApprovals[_tokenId] == _sender
-    senderIsOperator: bool = (self.ownerToOperators[_from])[_sender]
-    assert (senderIsOwner or senderIsApproved) or senderIsOperator
 
 
 @private
@@ -134,6 +133,20 @@ def _doTransfer(_from: address, _to: address, _tokenId: uint256):
     self.ownerToNFTokenCount[_from] -= 1
     # Log the transfer
     log.Transfer(_from, _to, _tokenId)
+
+  
+# @dev Returns whether the given spender can transfer a given token ID
+# @param spender address of the spender to query
+# @param tokenId uint256 ID of the token to be transferred
+# @return bool whether the msg.sender is approved for the given token ID, 
+#     is an operator of the owner, or is the owner of the token
+@private
+@constant
+def _isApprovedOrOwner(_spender: address, uint256 _tokenId) -> bool:
+    owner: address = self._ownerOf(_tokenId)
+    isOwner: bool = owner == _spender
+    isApproved: bool = _spender == self._getApproved(tokenId)
+    return (isOwner or isApproved) or self.isApprovedForAll(_spender, owner)
 
 
 ### TRANSFER FUNCTIONS ###
@@ -216,9 +229,13 @@ def setApprovalForAll(_operator: address, _approved: bool):
 @public
 @constant
 def getApproved(_tokenId: uint256) -> address:
+    return self._getApproved(_tokenId)
+
+@private
+@constant
+def _getApproved(_tokenId: uint256) -> address:
     assert self.idToOwner[_tokenId] != ZERO_ADDRESS
     return self.idToApprovals[_tokenId]
-
 
 # @dev Checks if `_operator` is an approved operator for `_owner`.
 # @param _owner The address that owns the NFTs.
@@ -226,6 +243,11 @@ def getApproved(_tokenId: uint256) -> address:
 @public
 @constant
 def isApprovedForAll( _owner: address, _operator: address) -> bool:
+    return self._isApprovedForAll(_owner, _operator)
+
+@private
+@constant
+def _isApprovedForAll( _owner: address, _operator: address) -> bool:
     return (self.ownerToOperators[_owner])[_operator]
 
 # @dev implement supportsInterface(bytes4) using a lookup table
