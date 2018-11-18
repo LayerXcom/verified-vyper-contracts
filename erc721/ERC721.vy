@@ -66,16 +66,11 @@ minter: address
 # @dev Mapping of interface id to bool about whether or not it's supported
 supportedInterfaces: bool[bytes[4]]
 
-# @dev ERC165 interface ID of ERC721 
-INTERFACE_ID_ERC721: constant(bytes[4]) = '\x80\xac\x58\xcd'
-
-# @dev First 4 bytes of keccak256("onERC721Received(address,address,uint256,bytes)"))
-ERC721_RECEIVED: constant(bytes[4]) = '\x15\x0b\x7a\x02'
-
 # @dev Contract constructor.
 @public
 def __init__():
-    self.supportedInterfaces[INTERFACE_ID_ERC721] = True
+    # '\x80\xac\x58\xcd' is ERC165 interface ID of ERC721 
+    self.supportedInterfaces['\x80\xac\x58\xcd'] = True
     self.minter = msg.sender
 
 
@@ -92,11 +87,6 @@ def balanceOf(_owner: address) -> uint256:
 # @dev Returns the address of the owner of the NFT. NFTs assigned to zero address are considered
 #      invalid, and queries about them do throw.
 # @param _tokenId The identifier for an NFT.
-@public
-@constant
-def ownerOf(_tokenId: uint256) -> address:
-    return self._ownerOf(_tokenId)
-
 @private
 @constant
 def _ownerOf(_tokenId: uint256) -> address:
@@ -104,17 +94,63 @@ def _ownerOf(_tokenId: uint256) -> address:
     assert owner != ZERO_ADDRESS
     return owner
 
+@public
+@constant
+def ownerOf(_tokenId: uint256) -> address:
+    return self._ownerOf(_tokenId)
+
+# @dev Get the approved address for a single NFT.
+# @notice Throws if `_tokenId` is not a valid NFT.
+# @param _tokenId ID of the NFT to query the approval of.
+@private
+@constant
+def _getApproved(_tokenId: uint256) -> address:
+    assert self.idToOwner[_tokenId] != ZERO_ADDRESS
+    return self.idToApprovals[_tokenId]
+
+@public
+@constant
+def getApproved(_tokenId: uint256) -> address:
+    return self._getApproved(_tokenId)
+
+# @dev Checks if `_operator` is an approved operator for `_owner`.
+# @param _owner The address that owns the NFTs.
+# @param _operator The address that acts on behalf of the owner.
+@private
+@constant
+def _isApprovedForAll( _owner: address, _operator: address) -> bool:
+    return (self.ownerToOperators[_owner])[_operator]
+
+@public
+@constant
+def isApprovedForAll( _owner: address, _operator: address) -> bool:
+    return self._isApprovedForAll(_owner, _operator)
+
+# @dev Returns whether the given spender can transfer a given token ID
+# @param spender address of the spender to query
+# @param tokenId uint256 ID of the token to be transferred
+# @return bool whether the msg.sender is approved for the given token ID, 
+#     is an operator of the owner, or is the owner of the token
+@private
+@constant
+def _isApprovedOrOwner(_spender: address, _tokenId: uint256) -> bool:
+    owner: address = self._ownerOf(_tokenId)
+    isOwner: bool = owner == _spender
+    isApproved: bool = _spender == self._getApproved(_tokenId)
+    return (isOwner or isApproved) or self.isApprovedForAll(_spender, owner)
+
 
 ### TRANSFER FUNCTION HELPERS ###
 
 # @dev Throws unless `msg.sender` is the current owner, an authorized operator, or the approved
 #      address for this NFT.
+#      NOTE: `msg.sender` not allowed in private function so pass `_sender`
 # Throws if `_from` is not the current owner.
 # Throws if `_to` is the zero address.
 # Throws if `_tokenId` is not a valid NFT.
 @private
-def _validateTransferFrom(_from: address, _to: address, _tokenId: uint256):
-    assert self._isApprovedOrOwner(msg.sender, _tokenId)
+def _validateTransferFrom(_from: address, _to: address, _tokenId: uint256, _sender: address):
+    assert self._isApprovedOrOwner(_sender, _tokenId)
     # Check that _to and _from are valid addresses
     assert _from != ZERO_ADDRESS
     assert _to != ZERO_ADDRESS
@@ -133,20 +169,6 @@ def _doTransfer(_from: address, _to: address, _tokenId: uint256):
     self.ownerToNFTokenCount[_from] -= 1
     # Log the transfer
     log.Transfer(_from, _to, _tokenId)
-
-  
-# @dev Returns whether the given spender can transfer a given token ID
-# @param spender address of the spender to query
-# @param tokenId uint256 ID of the token to be transferred
-# @return bool whether the msg.sender is approved for the given token ID, 
-#     is an operator of the owner, or is the owner of the token
-@private
-@constant
-def _isApprovedOrOwner(_spender: address, uint256 _tokenId) -> bool:
-    owner: address = self._ownerOf(_tokenId)
-    isOwner: bool = owner == _spender
-    isApproved: bool = _spender == self._getApproved(tokenId)
-    return (isOwner or isApproved) or self.isApprovedForAll(_spender, owner)
 
 
 ### TRANSFER FUNCTIONS ###
@@ -188,9 +210,9 @@ def safeTransferFrom(
     self._validateTransferFrom(_from, _to, _tokenId, msg.sender)
     self._doTransfer(_from, _to, _tokenId)
     _operator: address = ZERO_ADDRESS
-    if(_to.codesize > 0):
-        returnValue: bytes32 = ERC721Receiver(_to).onERC721Received(_operator, _from, _tokenId, _data)
-        assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
+    if(_to.codesize > 0): # check if the _to is a contract address
+        returnValue: bytes[4] = ERC721Receiver(_to).onERC721Received(_operator, _from, _tokenId, _data)
+        assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes[4])
 
 
 # @dev Set or reaffirm the approved address for an NFT.
@@ -222,33 +244,6 @@ def setApprovalForAll(_operator: address, _approved: bool):
     self.ownerToOperators[msg.sender][_operator] = _approved
     log.ApprovalForAll(msg.sender, _operator, _approved)
 
-
-# @dev Get the approved address for a single NFT.
-# @notice Throws if `_tokenId` is not a valid NFT.
-# @param _tokenId ID of the NFT to query the approval of.
-@public
-@constant
-def getApproved(_tokenId: uint256) -> address:
-    return self._getApproved(_tokenId)
-
-@private
-@constant
-def _getApproved(_tokenId: uint256) -> address:
-    assert self.idToOwner[_tokenId] != ZERO_ADDRESS
-    return self.idToApprovals[_tokenId]
-
-# @dev Checks if `_operator` is an approved operator for `_owner`.
-# @param _owner The address that owns the NFTs.
-# @param _operator The address that acts on behalf of the owner.
-@public
-@constant
-def isApprovedForAll( _owner: address, _operator: address) -> bool:
-    return self._isApprovedForAll(_owner, _operator)
-
-@private
-@constant
-def _isApprovedForAll( _owner: address, _operator: address) -> bool:
-    return (self.ownerToOperators[_owner])[_operator]
 
 # @dev implement supportsInterface(bytes4) using a lookup table
 # @param _interfaceID Id of the interface
