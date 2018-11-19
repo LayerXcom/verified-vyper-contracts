@@ -65,7 +65,7 @@ ownerToOperators: (bool[address])[address]
 minter: address
 
 # @dev Mapping of interface id to bool about whether or not it's supported
-supportedInterfaces: bool[bytes[4]]
+supportedInterfaces: bool[bytes32]
 
 
 # @dev Contract constructor.
@@ -76,12 +76,12 @@ def __init__():
     self.minter = msg.sender
 
 
-# @dev implement supportsInterface(bytes4) using a lookup table
+# @dev Interface identification is specified in ERC-165.
 # @param _interfaceID Id of the interface
 @public
 @constant
-def supportsInterface(_interfaceID: bytes[4]) -> bool:
-  return self.supportedInterfaces[_interfaceID]
+def supportsInterface(_interfaceID: bytes32) -> bool:
+    return self.supportedInterfaces[_interfaceID]
 
 
 ### VIEW FUNCTIONS ###
