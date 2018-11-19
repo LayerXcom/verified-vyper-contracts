@@ -40,12 +40,12 @@ Approval: event({
 #      all NFTs of the owner.
 # @param _owner Owner of NFT.
 # @param _operator Address to which we are setting operator rights.
-# @param _isApproved Status of operator rights(true if operator rights are given and false if
+# @param _approved Status of operator rights(true if operator rights are given and false if
 # revoked).
 ApprovalForAll: event({
         _owner: indexed(address),
         _operator: indexed(address),
-        _isApproved: bool
+        _approved: bool
     })
 
 
@@ -276,10 +276,10 @@ def approve(_approved: address, _tokenId: uint256):
 # @param _operator Address to add to the set of authorized operators.
 # @param _isApproved True if the operators is approved, false to revoke approval.
 @public
-def setApprovalForAll(_operator: address, _isApproved: bool):
+def setApprovalForAll(_operator: address, _approved: bool):
     assert _operator != ZERO_ADDRESS
-    self.ownerToOperators[msg.sender][_operator] = _isApproved
-    log.ApprovalForAll(msg.sender, _operator, _isApproved)
+    self.ownerToOperators[msg.sender][_operator] = _approved
+    log.ApprovalForAll(msg.sender, _operator, _approved)
 
 
 ### MINT & BURN FUNCTIONS ###
