@@ -20,7 +20,7 @@ contract ERC721Receiver:
 Transfer: event({
         _from: indexed(address),
         _to: indexed(address),
-        _tokenId:indexed(uint256)
+        _tokenId: indexed(uint256)
     })
 
 # @dev This emits when the approved address for an NFT is changed or reaffirmed. The zero
@@ -32,7 +32,7 @@ Transfer: event({
 Approval: event({
         _owner: indexed(address),
         _approved: indexed(address),
-        _tokenId:indexed(uint256)
+        _tokenId: indexed(uint256)
     })
 
 # @dev This emits when an operator is enabled or disabled for an owner. The operator can manage
