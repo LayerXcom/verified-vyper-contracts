@@ -60,6 +60,7 @@ $(specs_dir)/lemmas.k: resources/lemmas.md $(TANGLER)
 # Spec Files
 # ----------
 
+# ERC20
 erc20_files:=totalSupply-spec.k \
              balanceOf-spec.k \
              allowance-spec.k \
@@ -83,6 +84,27 @@ erc20_tmpls:=erc20/module-tmpl.k erc20/spec-tmpl.k
 	python3 resources/gen-spec.py $^ $* $* > $@
 	cp erc20/abstract-semantics.k $(dir $@)
 	cp erc20/verification.k $(dir $@)
+
+# ERC721
+erc721_files:=balanceOf-success-spec.k \
+			  balanceOf-failure-spec.k \
+			  ownerOf-success-spec.k \
+			  ownerOf-failure-spec.k \
+			  getApproved-success-spec.k \
+			  getApproved-failure-spec.k \
+			  isApprovedForAll-spec.k
+
+
+erc721: $(patsubst %, $(specs_dir)/erc721/%, $(erc721_files)) $(specs_dir)/lemmas.k
+
+erc721_tmpls:=erc721/module-tmpl.k erc721/spec-tmpl.k
+
+ $(specs_dir)/erc721/%-spec.k: $(erc721_tmpls) erc721/erc721-spec.ini
+	@echo >&2 "==  gen-spec: $@"
+	mkdir -p $(dir $@)
+	python3 resources/gen-spec.py $^ $* $* > $@
+	cp erc721/abstract-semantics.k $(dir $@)
+	cp erc721/verification.k $(dir $@)
 
 # Testing
 # -------
