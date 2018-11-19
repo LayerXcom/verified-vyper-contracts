@@ -135,12 +135,12 @@ def getApproved(_tokenId: uint256) -> address:
 # @param _operator The address that acts on behalf of the owner.
 @private
 @constant
-def _isApprovedForAll( _owner: address, _operator: address) -> bool:
+def _isApprovedForAll(_owner: address, _operator: address) -> bool:
     return (self.ownerToOperators[_owner])[_operator]
 
 @public
 @constant
-def isApprovedForAll( _owner: address, _operator: address) -> bool:
+def isApprovedForAll(_owner: address, _operator: address) -> bool:
     return self._isApprovedForAll(_owner, _operator)
 
 
