@@ -44,7 +44,7 @@ Approval: event({
 ApprovalForAll: event({
         _owner: indexed(address),
         _operator: indexed(address),
-        _approved: bool
+        _isApproved: bool
     })
 
 
@@ -239,11 +239,11 @@ def safeTransferFrom(
 @public
 def approve(_approved: address, _tokenId: uint256):
     # get owner
-    owner: address = self.idToApprovals[_tokenId]
+    owner: address = self._ownerOf(_tokenId)
+    assert _approved != owner
     # check requirements
     senderIsOwner: bool = self.idToOwner[_tokenId] == msg.sender
-    senderIsOperator: bool = (self.ownerToOperators[owner])[msg.sender]
-    assert (senderIsOwner or senderIsOperator)
+    assert (senderIsOwner or self._isApprovedForAll(owner, msg.sender))
     # set the approval
     self.idToApprovals[_tokenId] = _approved
     log.Approval(owner, _approved, _tokenId)
@@ -255,10 +255,10 @@ def approve(_approved: address, _tokenId: uint256):
 # @param _operator Address to add to the set of authorized operators.
 # @param _approved True if the operators is approved, false to revoke approval.
 @public
-def setApprovalForAll(_operator: address, _approved: bool):
+def setApprovalForAll(_operator: address, _isApproved: bool):
     assert _operator != ZERO_ADDRESS
-    self.ownerToOperators[msg.sender][_operator] = _approved
-    log.ApprovalForAll(msg.sender, _operator, _approved)
+    self.ownerToOperators[msg.sender][_operator] = _isApproved
+    log.ApprovalForAll(msg.sender, _operator, _isApproved)
 
 
 # @dev implement supportsInterface(bytes4) using a lookup table
