@@ -89,7 +89,10 @@ erc20_tmpls:=erc20/module-tmpl.k erc20/spec-tmpl.k
 erc721_files:=balanceOf-success-spec.k \
 			  balanceOf-failure-spec.k \
 			  ownerOf-success-spec.k \
-			  ownerOf-failure-spec.k
+			  ownerOf-failure-spec.k \
+			  getApproved-success-spec.k \
+			  getApproved-failure-spec.k
+
 
 erc721: $(patsubst %, $(specs_dir)/erc721/%, $(erc721_files)) $(specs_dir)/lemmas.k
 
