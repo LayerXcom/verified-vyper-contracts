@@ -72,7 +72,8 @@ supportedInterfaces: bool[bytes32]
 @public
 def __init__():
     # '\x80\xac\x58\xcd' is ERC165 interface ID of ERC721 
-    self.supportedInterfaces['\x80\xac\x58\xcd'] = True
+    # NOTE: Vyper compiler failed here. Issue: https://github.com/ethereum/vyper/issues/1088
+    # self.supportedInterfaces['\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\xac\x58\xcd'] = True
     self.minter = msg.sender
 
 
