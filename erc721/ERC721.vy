@@ -39,7 +39,7 @@ Approval: event({
 #      all NFTs of the owner.
 # @param _owner Owner of NFT.
 # @param _operator Address to which we are setting operator rights.
-# @param _approved Status of operator rights(true if operator rights are given and false if
+# @param _isApproved Status of operator rights(true if operator rights are given and false if
 # revoked).
 ApprovalForAll: event({
         _owner: indexed(address),
@@ -252,7 +252,7 @@ def approve(_approved: address, _tokenId: uint256):
 #      `msg.sender`'s assets. It also emits the ApprovalForAll event.
 # @notice This works even if sender doesn't own any tokens at the time.
 # @param _operator Address to add to the set of authorized operators.
-# @param _approved True if the operators is approved, false to revoke approval.
+# @param _isApproved True if the operators is approved, false to revoke approval.
 @public
 def setApprovalForAll(_operator: address, _isApproved: bool):
     assert _operator != ZERO_ADDRESS
