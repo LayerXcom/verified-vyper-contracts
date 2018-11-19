@@ -285,7 +285,7 @@ def mint(_to: address, _tokenId: uint256) -> bool:
 @public
 def burn(_tokenId: uint256):
     assert self._isApprovedOrOwner(msg.sender, _tokenId)
-    owner: address = self.ownerOf(_tokenId)
+    owner: address = self._ownerOf(_tokenId)
     self._clearApproval(owner, _tokenId)
     self._removeTokenFrom(owner, _tokenId)
     log.Transfer(owner, ZERO_ADDRESS, _tokenId)
