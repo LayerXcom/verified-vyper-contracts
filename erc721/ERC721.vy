@@ -225,9 +225,8 @@ def safeTransferFrom(
     ):
     self._validateTransferFrom(_from, _to, _tokenId, msg.sender)
     self._doTransfer(_from, _to, _tokenId)
-    _operator: address = ZERO_ADDRESS
     if(_to.codesize > 0): # check if the _to is a contract address
-        returnValue: bytes32 = ERC721Receiver(_to).onERC721Received(_operator, _from, _tokenId, _data)
+        returnValue: bytes32 = ERC721Receiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data)
         assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
 
 
