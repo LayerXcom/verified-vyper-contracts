@@ -10,6 +10,7 @@ contract ERC721Receiver:
             _data: bytes[1024]
         ) -> bytes32: constant
 
+
 # @dev Emits when ownership of any NFT changes by any mechanism. This event emits when NFTs are
 #      created (`from` == 0) and destroyed (`to` == 0). Exception: during contract creation, any
 #      number of NFTs may be created and assigned without emitting Transfer. At the time of any
@@ -66,6 +67,7 @@ minter: address
 # @dev Mapping of interface id to bool about whether or not it's supported
 supportedInterfaces: bool[bytes[4]]
 
+
 # @dev Contract constructor.
 @public
 def __init__():
@@ -73,6 +75,18 @@ def __init__():
     self.supportedInterfaces['\x80\xac\x58\xcd'] = True
     self.minter = msg.sender
 
+
+# @dev implement supportsInterface(bytes4) using a lookup table
+# @param _interfaceID Id of the interface
+@public
+@constant
+def supportsInterface(_interfaceID: bytes[4]) -> bool:
+  return self.supportedInterfaces[_interfaceID]
+
+
+### VIEW FUNCTIONS ###
+# @dev Some view functions are implemented with both public and private functions. Private
+#      functions are called within this contract for gas saving.
 
 # @dev Returns the number of NFTs owned by `_owner`. NFTs assigned to the zero address are
 #      considered invalid, and this function throws for queries about the zero address.
@@ -99,6 +113,7 @@ def _ownerOf(_tokenId: uint256) -> address:
 def ownerOf(_tokenId: uint256) -> address:
     return self._ownerOf(_tokenId)
 
+
 # @dev Get the approved address for a single NFT.
 # @notice Throws if `_tokenId` is not a valid NFT.
 # @param _tokenId ID of the NFT to query the approval of.
@@ -113,6 +128,7 @@ def _getApproved(_tokenId: uint256) -> address:
 def getApproved(_tokenId: uint256) -> address:
     return self._getApproved(_tokenId)
 
+
 # @dev Checks if `_operator` is an approved operator for `_owner`.
 # @param _owner The address that owns the NFTs.
 # @param _operator The address that acts on behalf of the owner.
@@ -125,6 +141,9 @@ def _isApprovedForAll( _owner: address, _operator: address) -> bool:
 @constant
 def isApprovedForAll( _owner: address, _operator: address) -> bool:
     return self._isApprovedForAll(_owner, _operator)
+
+
+### TRANSFER FUNCTION HELPERS ###
 
 # @dev Returns whether the given spender can transfer a given token ID
 # @param spender address of the spender to query
@@ -140,8 +159,6 @@ def _isApprovedOrOwner(_spender: address, _tokenId: uint256) -> bool:
     return (isOwner or isApproved) or self.isApprovedForAll(_spender, owner)
 
 
-### TRANSFER FUNCTION HELPERS ###
-
 # @dev Throws unless `msg.sender` is the current owner, an authorized operator, or the approved
 #      address for this NFT.
 #      NOTE: `msg.sender` not allowed in private function so pass `_sender`
@@ -155,6 +172,7 @@ def _validateTransferFrom(_from: address, _to: address, _tokenId: uint256, _send
     assert _from != ZERO_ADDRESS # NOTE: Is this necessary?
     assert _to != ZERO_ADDRESS
 
+# @dev Add a NFT to a given address
 @private
 def _addTokenTo(_to: address, _tokenId: uint256):
     assert self.idToOwner[_tokenId] == ZERO_ADDRESS
@@ -163,6 +181,7 @@ def _addTokenTo(_to: address, _tokenId: uint256):
     # Change count tracking
     self.ownerToNFTokenCount[_to] += 1
 
+# @dev Remove a NFT from a given address
 @private
 def _removeTokenFrom(_from: address, _tokenId: uint256):
     assert self.idToOwner[_tokenId] == _from
@@ -171,6 +190,7 @@ def _removeTokenFrom(_from: address, _tokenId: uint256):
     # Change count tracking
     self.ownerToNFTokenCount[_from] -= 1
 
+# @dev Clear an approval of a given address
 @private
 def _clearApproval(_owner: address, _tokenId: uint256):
     assert self.idToOwner[_tokenId] == _owner
@@ -178,6 +198,7 @@ def _clearApproval(_owner: address, _tokenId: uint256):
         # Reset approvals
         self.idToApprovals[_tokenId] = ZERO_ADDRESS
 
+# @dev Exeute transfers of a NFT
 @private
 def _doTransfer(_from: address, _to: address, _tokenId: uint256):
     self._clearApproval(_from, _tokenId)
@@ -260,12 +281,7 @@ def setApprovalForAll(_operator: address, _isApproved: bool):
     log.ApprovalForAll(msg.sender, _operator, _isApproved)
 
 
-# @dev implement supportsInterface(bytes4) using a lookup table
-# @param _interfaceID Id of the interface
-@public
-@constant
-def supportsInterface(_interfaceID: bytes[4]) -> bool:
-  return self.supportedInterfaces[_interfaceID]
+### MINT & BURN FUNCTIONS ###
 
 # @dev Function to mint tokens
 # @param to The address that will receive the minted tokens.
@@ -278,6 +294,7 @@ def mint(_to: address, _tokenId: uint256) -> bool:
     self._addTokenTo(_to, _tokenId)
     log.Transfer(ZERO_ADDRESS, _to, _tokenId)
     return True
+
 
 # @dev Burns a specific ERC721 token.
 # @param tokenId uint256 id of the ERC721 token to be burned.
