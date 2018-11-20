@@ -67,13 +67,13 @@ minter: address
 # @dev Mapping of interface id to bool about whether or not it's supported
 supportedInterfaces: bool[bytes32]
 
+# @dev ERC165 interface ID of ERC721
+ERC721_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000080ac58cd
 
 # @dev Contract constructor.
 @public
 def __init__():
-    # '\x80\xac\x58\xcd' is ERC165 interface ID of ERC721 
-    # NOTE: Vyper compiler failed here. Issue: https://github.com/ethereum/vyper/issues/1088
-    # self.supportedInterfaces['\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\xac\x58\xcd'] = True
+    self.supportedInterfaces[ERC721_INTERFACE_ID] = True
     self.minter = msg.sender
 
 
