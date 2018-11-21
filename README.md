@@ -3,16 +3,20 @@ Formally Verified Vyper Contracts
 
 ## How to get started
 
-* Check prerequisites of K framework.
+You need to install dependencies of K. See [prerequisites](https://github.com/kframework/k#prerequisites).
 
-https://github.com/kframework/k#prerequisites
-
-* Clone repo and build:
+Then clone this repository and build.
 
 ```
 git clone git@github.com:LayerXcom/verified-vyper-contracts.git
 cd verified-vyper-contracts
 make all
+```
+
+#### Modifying `hashedLocation`
+Fow now, `#hashedLocation` rule in [edsl.md](https://github.com/kframework/evm-semantics/blob/e6c4b961495768a429fcffaa81418472953c8568/edsl.md#hashed-location-for-storage) of KEVM is not correct for the latest Vyper storage layout. Therefore, you need to modify that rule in `.build/evm-semantics/.build/node/edsl.k` (line 303) manually as follows: 
+```
+rule #hashedLocation("Vyper", BASE, OFFSET OFFSETS) => #hashedLocation("Vyper", keccakIntList(BASE OFFSET), OFFSETS)
 ```
 
 ## Instruction
@@ -42,12 +46,6 @@ This project is using WIP K version and you can use the options described [here]
 NOTE: The above command executes the following command:
 ```
 .build/k/k-distribution/target/release/k/bin/kprove -v -d .build/evm-semantics/.build/java -m VERIFICATION --z3-executable --z3-impl-timeout 500 specs/<project>/<target>-spec.k
-```
-
-#### Modifying `hashedLocation`
-Fow now, `#hashedLocation` rule in [edsl.md](https://github.com/kframework/evm-semantics/blob/e6c4b961495768a429fcffaa81418472953c8568/edsl.md#hashed-location-for-storage) of KEVM is not correct for the latest Vyper storage layout. Therefore, you need to modify that manually as follows: 
-```
-rule #hashedLocation("Vyper", BASE, OFFSET OFFSETS) => #hashedLocation("Vyper", keccakIntList(BASE OFFSET), OFFSETS)
 ```
 
 ## References
