@@ -67,12 +67,16 @@ minter: address
 # @dev Mapping of interface id to bool about whether or not it's supported
 supportedInterfaces: bool[bytes32]
 
+# @dev ERC165 interface ID of ERC165
+ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000001ffc9a7
+
 # @dev ERC165 interface ID of ERC721
 ERC721_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000080ac58cd
 
 # @dev Contract constructor.
 @public
 def __init__():
+    self.supportedInterfaces[ERC165_INTERFACE_ID] = True
     self.supportedInterfaces[ERC721_INTERFACE_ID] = True
     self.minter = msg.sender
 
