@@ -13,11 +13,31 @@ cd verified-vyper-contracts
 make all
 ```
 
-#### Modifying `hashedLocation`
-Fow now, `#hashedLocation` rule in [edsl.md](https://github.com/kframework/evm-semantics/blob/e6c4b961495768a429fcffaa81418472953c8568/edsl.md#hashed-location-for-storage) of KEVM is not correct for the latest Vyper storage layout. Therefore, you need to modify that rule in `.build/evm-semantics/.build/java/edsl.k` (line 303) manually as follows: 
+### Modification in eDSL
+Current eDSL defined in [edsl.md](https://github.com/kframework/evm-semantics/blob/9a409babcd9b77a0f9a30f52350e4c5d46e6b086/edsl.md) and [data.md](https://github.com/kframework/evm-semantics/blob/9a409babcd9b77a0f9a30f52350e4c5d46e6b086/data.md) is not correct or enough so we need to modify them as follows. These things would be fixed and added in the original repository.
+
+#### `hashedLocation`
+`#hashedLocation` rule is not correct for the latest Vyper storage layout. Therefore, you need to modify that rule in `.build/evm-semantics/.build/java/edsl.k` (line 303) manually as follows: 
 ```
 rule #hashedLocation("Vyper", BASE, OFFSET OFFSETS) => #hashedLocation("Vyper", keccakIntList(BASE OFFSET), OFFSETS)
 ```
+
+#### Boolean
+To handle bools in stack, we need to add these rules.
+`.build/evm-semantics/.build/java/data.k` (line 109)
+```| #rangeBool ( Int )```
+
+`.build/evm-semantics/.build/java/data.k` (line 121)
+```rule #rangeBool    ( X ) => #range ( 0 <= X <= 1 ) [macro]```
+
+`.build/evm-semantics/.build/java/edsl.k` L318
+```
+syntax WordStack ::= bool2ByteStack( Int, Int ) [function]
+// ------------------------------------------------------------
+rule bool2ByteStack(X, 32) => 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : 0 : X : .WordStack
+    requires #rangeBool(X)
+```
+
 
 ## Instruction
 
