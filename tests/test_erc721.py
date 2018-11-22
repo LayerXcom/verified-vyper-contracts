@@ -1,130 +1,164 @@
 # Modified from: https://github.com/ethereum/vyper/blob/25d04085a7046a97c4e4a4d3da95963e22cf9344/tests/examples/tokens/test_erc721.py
 import pytest
 
-
-IDS = range(1, 65)
+firstTokenId = 1
+secondTokenId = 2
+unknownTokenId = 3
+ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+ERC165_INTERFACE_ID = '0x0000000000000000000000000000000000000000000000000000000001ffc9a7'
+ERC721_INTERFACE_ID = '0x0000000000000000000000000000000000000000000000000000000080ac58cd'
 
 
 @pytest.fixture
 def c(get_contract, w3):
-    # a0, a1 own 1 token each
-    owners = w3.eth.accounts[:3]
-    # a2 owns 2 tokens
-    owners.append(w3.eth.accounts[2])
-    # a3 owns the rest
-    owners.extend([w3.eth.accounts[3]] * 60)
-    with open('erc721/ERC721.vy') as f:
-        return get_contract(
-            f.read(),
-            owners, IDS
-        )
+    with open('./erc721/ERC721.vy') as f:
+        code = f.read()
+    c = get_contract(code)
+    owner, operator, someone = w3.eth.accounts[:3]
+    c.mint(someone, firstTokenId, transact={'from': owner})
+    return c
 
 
-def test_balanceOf(c, w3):
-    a0, a1, a2, a3, a4 = w3.eth.accounts[:5]
-    # Correctly lists balances
-    assert c.balanceOf(a0) == 1
-    assert c.balanceOf(a1) == 1
-    assert c.balanceOf(a2) == 2
-    assert c.balanceOf(a3) == 60
-    # Correctly reports account with no balance
-    assert c.balanceOf(a4) == 0
+def test_supportsInterface(c):
+    assert c.supportsInterface(ERC165_INTERFACE_ID) == True
+    assert c.supportsInterface(ERC721_INTERFACE_ID) == True
+
+
+def test_balanceOf(c, w3, assert_tx_failed):
+    owner, operator, someone = w3.eth.accounts[:3]
+    assert c.balanceOf(someone) == 1
+    assert_tx_failed(lambda: c.balanceOf(ZERO_ADDRESS))
 
 
 def test_ownerOf(c, w3, assert_tx_failed):
-    a0, a1, a2, a3 = w3.eth.accounts[:4]
-    # Correctly finds ownership
-    assert c.ownerOf(IDS[0]) == a0
-    assert c.ownerOf(IDS[1]) == a1
-    assert c.ownerOf(IDS[2]) == a2
-    assert c.ownerOf(IDS[3]) == a2
-    for _id in IDS[4:]:
-        assert c.ownerOf(_id) == a3
-    # Reverts for non-existant ID
-    assert_tx_failed(lambda: c.ownerOf(99))
+    owner, operator, someone = w3.eth.accounts[:3]
+    assert c.ownerOf(firstTokenId) == someone
+    assert_tx_failed(lambda: c.ownerOf(unknownTokenId))
 
 
-def test_approve(w3, c, assert_tx_failed):
-    a0, a1, a2 = w3.eth.accounts[:3]
-    # Approval can be given and taken away
-    assert c.getApproved(IDS[0]) != a1
-    c.approve(a1, IDS[0], transact={'from': a0})
-    assert c.getApproved(IDS[0]) == a1
-    c.approve(a2, IDS[0], transact={'from': a0})
-    assert c.getApproved(IDS[0]) != a1
-    # Can't approve something you don't own
-    assert_tx_failed(lambda: c.approve(a1, IDS[1], transact={'from': a0}))
+def test_getApproved(c, w3, assert_tx_failed):
+    owner, operator, someone = w3.eth.accounts[:3]
+
+    # getApproved of token not existing
+    assert_tx_failed(lambda: c.approve(
+        operator, unknownTokenId, transact={'from': someone}))
+
+    assert c.getApproved(firstTokenId) is None
+
+    c.approve(operator, firstTokenId, transact={'from': someone})
+
+    assert c.getApproved(firstTokenId) == operator
 
 
-def test_approveAll(w3, c):
-    a0, a1 = w3.eth.accounts[:2]
+def test_isApprovedForAll(c, w3):
+    owner, operator, someone = w3.eth.accounts[:3]
 
-    assert not c.isApprovedForAll(a0, a1)
-    c.setApprovalForAll(a1, True, transact={'from': a0})
-    assert c.isApprovedForAll(a0, a1)
-    c.setApprovalForAll(a1, False, transact={'from': a0})
-    assert not c.isApprovedForAll(a0, a1)
+    assert c.isApprovedForAll(someone, operator) == False
+
+    c.setApprovalForAll(operator, True,  transact={'from': someone})
+
+    assert c.isApprovedForAll(someone, operator) == True
 
 
-def test_owner_transferFrom(w3, c, assert_tx_failed):
-    a0, a1 = w3.eth.accounts[:2]
+def test_transferFrom(c, w3, assert_tx_failed, get_logs):
+    owner, operator, someone = w3.eth.accounts[:3]
 
-    # Basic transfer.
-    c.transferFrom(a0, a1, IDS[0], transact={'from': a0})
+    # transfer from zero address
+    assert_tx_failed(lambda: c.transferFrom(
+        ZERO_ADDRESS, operator, firstTokenId, transact={'from': someone}))
+
+    # transfer to zero address
+    assert_tx_failed(lambda: c.transferFrom(
+        someone, ZERO_ADDRESS, firstTokenId, transact={'from': someone}))
+
+    # transfer token without ownership
+    assert_tx_failed(lambda: c.transferFrom(
+        someone, operator, secondTokenId, transact={'from': someone}))
+
+    # FIX: TransactionFailed
+    tx_hash = c.transferFrom(
+        someone, operator, firstTokenId, transact={'from': someone})
+
+    logs = get_logs(tx_hash, c, 'ApprovalForAll')
+
+    assert len(logs) > 0
+    assert logs[0]['args']['_from'] == a0
+    assert logs[0]['args']['_to'] == a1
+    assert logs[0]['args']['_tokenId'] == firstTokenId
+
     assert c.balanceOf(a0) == 0
-    assert c.balanceOf(a1) == 2
-
-    # Can't transfer one you don't own
-    assert_tx_failed(lambda: c.transferFrom(a0, a1, IDS[0], transact={'from': a0}))
+    assert c.balanceOf(a1) == 1
 
 
-def test_approve_transferFrom(w3, c, assert_tx_failed):
-    a0, a1, a2 = w3.eth.accounts[:3]
+def test_approve(c, w3, assert_tx_failed, get_logs):
+    owner, operator, someone = w3.eth.accounts[:3]
 
-    # Approved transfer
-    c.approve(a2, IDS[0], transact={'from': a0})
-    c.transferFrom(a0, a1, IDS[0], transact={'from': a2})
-    assert c.balanceOf(a0) == 0
-    assert c.balanceOf(a1) == 2
+    # approve myself
+    assert_tx_failed(lambda: c.approve(
+        someone, firstTokenId, transact={'from': someone}))
 
+    # approve token without ownership
+    assert_tx_failed(lambda: c.approve(
+        operator, secondTokenId, transact={'from': someone}))
 
-def test_operator_transferFrom(w3, c, assert_tx_failed):
-    a0, a1, a2 = w3.eth.accounts[:3]
+    tx_hash = c.approve(operator, firstTokenId, transact={'from': someone})
+    logs = get_logs(tx_hash, c, 'Approval')
 
-    # Approved transfer
-    c.setApprovalForAll(a2, True, transact={'from': a0})
-    c.transferFrom(a0, a1, IDS[0], transact={'from': a2})
-    assert c.balanceOf(a0) == 0
-    assert c.balanceOf(a1) == 2
-
-
-def test_account_safeTransferFrom(w3, c, assert_tx_failed):
-    a0, a1 = w3.eth.accounts[:2]
-
-    # Basic transfer.
-    c.safeTransferFrom(a0, a1, IDS[0], transact={'from': a0})
-    assert c.balanceOf(a0) == 0
-    assert c.balanceOf(a1) == 2
-
-    # Can't transfer one you don't own
-    assert_tx_failed(lambda: c.safeTransferFrom(a0, a1, IDS[0], transact={'from': a0}))
+    assert len(logs) > 0
+    assert logs[0]['args']['_owner'] == someone
+    assert logs[0]['args']['_approved'] == operator
+    assert logs[0]['args']['_tokenId'] == firstTokenId
 
 
-def test_contract_safeTransferFrom(w3, c, assert_tx_failed, get_contract):
-    a0, a1 = w3.eth.accounts[:2]
+def test_setApprovalForAll(c, w3, assert_tx_failed, get_logs):
+    owner, operator, someone = w3.eth.accounts[:3]
+    approved = True
 
-    # Can't transfer to a contract that doesn't implement the receiver code
-    assert_tx_failed(lambda: c.safeTransferFrom(a0, c.address, IDS[0], transact={'from': a0}))
+    # setApprovalForAll to zero address
+    assert_tx_failed(lambda: c.setApprovalForAll(
+        ZERO_ADDRESS, approved, transact={'from': someone}))
 
-    # Only to an address that implements that function
-    receiver = get_contract("""
-@public
-def onERC721Received(
-        _operator: address,
-        _from: address,
-        _tokenId: uint256,
-        _data: bytes[1024]
-    ) -> bytes32:
-    return method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
-    """)
-    c.safeTransferFrom(a0, receiver.address, IDS[0], transact={'from': a0})
+    tx_hash = c.setApprovalForAll(operator, True, transact={'from': someone})
+    logs = get_logs(tx_hash, c, 'ApprovalForAll')
+
+    assert len(logs) > 0
+    assert logs[0]['args']['_owner'] == someone
+    assert logs[0]['args']['_operator'] == operator
+    assert logs[0]['args']['_approved'] == approved
+
+
+def test_mint(c, w3, assert_tx_failed, get_logs):
+    owner, operator, someone = w3.eth.accounts[:3]
+
+    # mint by non-owner
+    assert_tx_failed(lambda: c.mint(
+        someone, firstTokenId, transact={'from': someone}))
+
+    # mint to zero address
+    assert_tx_failed(lambda: c.mint(
+        ZERO_ADDRESS, firstTokenId, transact={'from': owner}))
+
+    tx_hash = c.mint(someone, secondTokenId, transact={'from': owner})
+    logs = get_logs(tx_hash, c, 'Transfer')
+
+    assert c.balanceOf(someone) == 2
+    assert len(logs) > 0
+    assert logs[0]['args']['_from'] == ZERO_ADDRESS
+    assert logs[0]['args']['_to'] == someone
+    assert logs[0]['args']['_tokenId'] == secondTokenId
+
+
+def test_burn(c, w3, assert_tx_failed, get_logs):
+    owner, operator, someone = w3.eth.accounts[:3]
+
+    # burn token without ownership
+    assert_tx_failed(lambda: c.burn(firstTokenId, transact={'from': owner}))
+
+    tx_hash = c.burn(firstTokenId, transact={'from': someone})
+    logs = get_logs(tx_hash, c, 'Transfer')
+
+    assert c.balanceOf(someone) == 0
+    assert len(logs) > 0
+    assert logs[0]['args']['_from'] == someone
+    assert logs[0]['args']['_to'] == ZERO_ADDRESS
+    assert logs[0]['args']['_tokenId'] == firstTokenId
