@@ -14,7 +14,7 @@ make all
 ```
 
 #### Modifying `hashedLocation`
-Fow now, `#hashedLocation` rule in [edsl.md](https://github.com/kframework/evm-semantics/blob/e6c4b961495768a429fcffaa81418472953c8568/edsl.md#hashed-location-for-storage) of KEVM is not correct for the latest Vyper storage layout. Therefore, you need to modify that rule in `.build/evm-semantics/.build/node/edsl.k` (line 303) manually as follows: 
+Fow now, `#hashedLocation` rule in [edsl.md](https://github.com/kframework/evm-semantics/blob/e6c4b961495768a429fcffaa81418472953c8568/edsl.md#hashed-location-for-storage) of KEVM is not correct for the latest Vyper storage layout. Therefore, you need to modify that rule in `.build/evm-semantics/.build/java/edsl.k` (line 303) manually as follows: 
 ```
 rule #hashedLocation("Vyper", BASE, OFFSET OFFSETS) => #hashedLocation("Vyper", keccakIntList(BASE OFFSET), OFFSETS)
 ```
