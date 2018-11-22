@@ -75,19 +75,18 @@ def test_transferFrom(c, w3, assert_tx_failed, get_logs):
     assert_tx_failed(lambda: c.transferFrom(
         someone, operator, secondTokenId, transact={'from': someone}))
 
-    # FIX: TransactionFailed
     tx_hash = c.transferFrom(
         someone, operator, firstTokenId, transact={'from': someone})
 
-    logs = get_logs(tx_hash, c, 'ApprovalForAll')
+    logs = get_logs(tx_hash, c, 'Transfer')
 
     assert len(logs) > 0
-    assert logs[0]['args']['_from'] == a0
-    assert logs[0]['args']['_to'] == a1
+    assert logs[0]['args']['_from'] == someone
+    assert logs[0]['args']['_to'] == operator
     assert logs[0]['args']['_tokenId'] == firstTokenId
 
-    assert c.balanceOf(a0) == 0
-    assert c.balanceOf(a1) == 1
+    assert c.balanceOf(someone) == 0
+    assert c.balanceOf(operator) == 1
 
 
 def test_approve(c, w3, assert_tx_failed, get_logs):
