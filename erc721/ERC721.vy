@@ -191,7 +191,7 @@ def _addTokenTo(_to: address, _tokenId: uint256):
 def _removeTokenFrom(_from: address, _tokenId: uint256):
     assert self.idToOwner[_tokenId] == _from
     # Change the owner
-    self.idToOwner[_tokenId] = _from
+    self.idToOwner[_tokenId] = ZERO_ADDRESS
     # Change count tracking
     self.ownerToNFTokenCount[_from] -= 1
 
