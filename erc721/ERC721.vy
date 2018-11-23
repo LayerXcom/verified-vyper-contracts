@@ -73,6 +73,7 @@ ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000
 # @dev ERC165 interface ID of ERC721
 ERC721_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000080ac58cd
 
+
 # @dev Contract constructor.
 @public
 def __init__():
@@ -161,6 +162,7 @@ def _addTokenTo(_to: address, _tokenId: uint256):
     # Change count tracking
     self.ownerToNFTokenCount[_to] += 1
 
+
 # @dev Remove a NFT from a given address
 #      Throws if `_from` is not the current owner.
 @private
@@ -172,6 +174,7 @@ def _removeTokenFrom(_from: address, _tokenId: uint256):
     # Change count tracking
     self.ownerToNFTokenCount[_from] -= 1
 
+
 # @dev Clear an approval of a given address
 #      Throws if `_owner` is not the current owner.
 @private
@@ -181,6 +184,7 @@ def _clearApproval(_owner: address, _tokenId: uint256):
     if self.idToApprovals[_tokenId] != ZERO_ADDRESS:
         # Reset approvals
         self.idToApprovals[_tokenId] = ZERO_ADDRESS
+
 
 # @dev Exeute transfer of a NFT. 
 #      Throws unless `msg.sender` is the current owner, an authorized operator, or the approved
