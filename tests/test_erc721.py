@@ -82,9 +82,10 @@ def test_transferFrom(c, w3, assert_tx_failed, get_logs):
     logs = get_logs(tx_hash, c, 'Transfer')
 
     assert len(logs) > 0
-    assert logs[0]['args']['_from'] == someone
-    assert logs[0]['args']['_to'] == operator
-    assert logs[0]['args']['_tokenId'] == FIRST_TOKEN_ID
+    args = logs[0].args
+    assert args._from == someone
+    assert args._to == operator
+    assert args._tokenId == FIRST_TOKEN_ID
 
     assert c.balanceOf(someone) == 0
     assert c.balanceOf(operator) == 1
@@ -105,9 +106,10 @@ def test_approve(c, w3, assert_tx_failed, get_logs):
     logs = get_logs(tx_hash, c, 'Approval')
 
     assert len(logs) > 0
-    assert logs[0]['args']['_owner'] == someone
-    assert logs[0]['args']['_approved'] == operator
-    assert logs[0]['args']['_tokenId'] == FIRST_TOKEN_ID
+    args = logs[0].args
+    assert args._owner == someone
+    assert args._approved == operator
+    assert args._tokenId == FIRST_TOKEN_ID
 
 
 def test_setApprovalForAll(c, w3, assert_tx_failed, get_logs):
@@ -122,9 +124,10 @@ def test_setApprovalForAll(c, w3, assert_tx_failed, get_logs):
     logs = get_logs(tx_hash, c, 'ApprovalForAll')
 
     assert len(logs) > 0
-    assert logs[0]['args']['_owner'] == someone
-    assert logs[0]['args']['_operator'] == operator
-    assert logs[0]['args']['_approved'] == approved
+    args = logs[0].args
+    assert args._owner == someone
+    assert args._operator == operator
+    assert args._approved == approved
 
 
 def test_mint(c, w3, assert_tx_failed, get_logs):
@@ -143,9 +146,10 @@ def test_mint(c, w3, assert_tx_failed, get_logs):
 
     assert c.balanceOf(someone) == 2
     assert len(logs) > 0
-    assert logs[0]['args']['_from'] == ZERO_ADDRESS
-    assert logs[0]['args']['_to'] == someone
-    assert logs[0]['args']['_tokenId'] == SECOND_TOKEN_ID
+    args = logs[0].args
+    assert args._from == ZERO_ADDRESS
+    assert args._to == someone
+    assert args._tokenId == SECOND_TOKEN_ID
 
 
 def test_burn(c, w3, assert_tx_failed, get_logs):
@@ -159,6 +163,7 @@ def test_burn(c, w3, assert_tx_failed, get_logs):
 
     assert c.balanceOf(someone) == 0
     assert len(logs) > 0
-    assert logs[0]['args']['_from'] == someone
-    assert logs[0]['args']['_to'] == ZERO_ADDRESS
-    assert logs[0]['args']['_tokenId'] == FIRST_TOKEN_ID
+    args = logs[0].args
+    assert args._from == someone
+    assert args._to == ZERO_ADDRESS
+    assert args._tokenId == FIRST_TOKEN_ID
