@@ -1,4 +1,3 @@
-# Modified from: https://github.com/ethereum/vyper/blob/25d04085a7046a97c4e4a4d3da95963e22cf9344/tests/examples/tokens/test_erc721.py
 import pytest
 
 FIRST_TOKEN_ID = 1
