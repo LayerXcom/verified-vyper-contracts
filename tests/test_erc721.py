@@ -6,6 +6,7 @@ INVALID_TOKEN_ID = 3
 ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 ERC165_INTERFACE_ID = '0x0000000000000000000000000000000000000000000000000000000001ffc9a7'
 ERC721_INTERFACE_ID = '0x0000000000000000000000000000000000000000000000000000000080ac58cd'
+INVALID_INTERFACE_ID = '0x0000000000000000000000000000000000000000000000000000000012345678'
 
 
 @pytest.fixture
@@ -18,9 +19,10 @@ def c(get_contract, w3):
     return c
 
 
-def test_supportsInterface(c):
+def test_supportsInterface(c, assert_tx_failed):
     assert c.supportsInterface(ERC165_INTERFACE_ID) == True
     assert c.supportsInterface(ERC721_INTERFACE_ID) == True
+    assert c.supportsInterface(INVALID_INTERFACE_ID) == False
 
 
 def test_balanceOf(c, w3, assert_tx_failed):
