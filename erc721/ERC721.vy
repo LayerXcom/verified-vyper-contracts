@@ -90,8 +90,6 @@ def supportsInterface(_interfaceID: bytes32) -> bool:
 
 
 ### VIEW FUNCTIONS ###
-# @dev Some view functions are implemented with both public and private functions. Private
-#      functions are called within this contract for gas saving.
 
 # @dev Returns the number of NFTs owned by `_owner`.
 #      Throws if `_tokenId` is not a valid NFT. NFTs assigned to the zero address are considered invalid.
@@ -110,6 +108,7 @@ def balanceOf(_owner: address) -> uint256:
 @constant
 def ownerOf(_tokenId: uint256) -> address:
     owner: address = self.idToOwner[_tokenId]
+    # Throws if `_tokenId` is not a valid NFT
     assert owner != ZERO_ADDRESS
     return owner
 
