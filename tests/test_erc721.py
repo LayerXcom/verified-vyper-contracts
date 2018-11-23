@@ -1,9 +1,9 @@
 # Modified from: https://github.com/ethereum/vyper/blob/25d04085a7046a97c4e4a4d3da95963e22cf9344/tests/examples/tokens/test_erc721.py
 import pytest
 
-firstTokenId = 1
-secondTokenId = 2
-unknownTokenId = 3
+FIRST_TOKEN_ID = 1
+SECOND_TOKEN_ID = 2
+INVALID_TOKEN_ID = 3
 ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 ERC165_INTERFACE_ID = '0x0000000000000000000000000000000000000000000000000000000001ffc9a7'
 ERC721_INTERFACE_ID = '0x0000000000000000000000000000000000000000000000000000000080ac58cd'
@@ -15,7 +15,7 @@ def c(get_contract, w3):
         code = f.read()
     c = get_contract(code)
     owner, operator, someone = w3.eth.accounts[:3]
-    c.mint(someone, firstTokenId, transact={'from': owner})
+    c.mint(someone, FIRST_TOKEN_ID, transact={'from': owner})
     return c
 
 
@@ -32,8 +32,8 @@ def test_balanceOf(c, w3, assert_tx_failed):
 
 def test_ownerOf(c, w3, assert_tx_failed):
     owner, operator, someone = w3.eth.accounts[:3]
-    assert c.ownerOf(firstTokenId) == someone
-    assert_tx_failed(lambda: c.ownerOf(unknownTokenId))
+    assert c.ownerOf(FIRST_TOKEN_ID) == someone
+    assert_tx_failed(lambda: c.ownerOf(INVALID_TOKEN_ID))
 
 
 def test_getApproved(c, w3, assert_tx_failed):
@@ -41,13 +41,13 @@ def test_getApproved(c, w3, assert_tx_failed):
 
     # getApproved of token not existing
     assert_tx_failed(lambda: c.approve(
-        operator, unknownTokenId, transact={'from': someone}))
+        operator, INVALID_TOKEN_ID, transact={'from': someone}))
 
-    assert c.getApproved(firstTokenId) is None
+    assert c.getApproved(FIRST_TOKEN_ID) is None
 
-    c.approve(operator, firstTokenId, transact={'from': someone})
+    c.approve(operator, FIRST_TOKEN_ID, transact={'from': someone})
 
-    assert c.getApproved(firstTokenId) == operator
+    assert c.getApproved(FIRST_TOKEN_ID) == operator
 
 
 def test_isApprovedForAll(c, w3):
@@ -65,25 +65,25 @@ def test_transferFrom(c, w3, assert_tx_failed, get_logs):
 
     # transfer from zero address
     assert_tx_failed(lambda: c.transferFrom(
-        ZERO_ADDRESS, operator, firstTokenId, transact={'from': someone}))
+        ZERO_ADDRESS, operator, FIRST_TOKEN_ID, transact={'from': someone}))
 
     # transfer to zero address
     assert_tx_failed(lambda: c.transferFrom(
-        someone, ZERO_ADDRESS, firstTokenId, transact={'from': someone}))
+        someone, ZERO_ADDRESS, FIRST_TOKEN_ID, transact={'from': someone}))
 
     # transfer token without ownership
     assert_tx_failed(lambda: c.transferFrom(
-        someone, operator, secondTokenId, transact={'from': someone}))
+        someone, operator, SECOND_TOKEN_ID, transact={'from': someone}))
 
     tx_hash = c.transferFrom(
-        someone, operator, firstTokenId, transact={'from': someone})
+        someone, operator, FIRST_TOKEN_ID, transact={'from': someone})
 
     logs = get_logs(tx_hash, c, 'Transfer')
 
     assert len(logs) > 0
     assert logs[0]['args']['_from'] == someone
     assert logs[0]['args']['_to'] == operator
-    assert logs[0]['args']['_tokenId'] == firstTokenId
+    assert logs[0]['args']['_tokenId'] == FIRST_TOKEN_ID
 
     assert c.balanceOf(someone) == 0
     assert c.balanceOf(operator) == 1
@@ -94,19 +94,19 @@ def test_approve(c, w3, assert_tx_failed, get_logs):
 
     # approve myself
     assert_tx_failed(lambda: c.approve(
-        someone, firstTokenId, transact={'from': someone}))
+        someone, FIRST_TOKEN_ID, transact={'from': someone}))
 
     # approve token without ownership
     assert_tx_failed(lambda: c.approve(
-        operator, secondTokenId, transact={'from': someone}))
+        operator, SECOND_TOKEN_ID, transact={'from': someone}))
 
-    tx_hash = c.approve(operator, firstTokenId, transact={'from': someone})
+    tx_hash = c.approve(operator, FIRST_TOKEN_ID, transact={'from': someone})
     logs = get_logs(tx_hash, c, 'Approval')
 
     assert len(logs) > 0
     assert logs[0]['args']['_owner'] == someone
     assert logs[0]['args']['_approved'] == operator
-    assert logs[0]['args']['_tokenId'] == firstTokenId
+    assert logs[0]['args']['_tokenId'] == FIRST_TOKEN_ID
 
 
 def test_setApprovalForAll(c, w3, assert_tx_failed, get_logs):
@@ -131,33 +131,33 @@ def test_mint(c, w3, assert_tx_failed, get_logs):
 
     # mint by non-owner
     assert_tx_failed(lambda: c.mint(
-        someone, firstTokenId, transact={'from': someone}))
+        someone, FIRST_TOKEN_ID, transact={'from': someone}))
 
     # mint to zero address
     assert_tx_failed(lambda: c.mint(
-        ZERO_ADDRESS, firstTokenId, transact={'from': owner}))
+        ZERO_ADDRESS, FIRST_TOKEN_ID, transact={'from': owner}))
 
-    tx_hash = c.mint(someone, secondTokenId, transact={'from': owner})
+    tx_hash = c.mint(someone, SECOND_TOKEN_ID, transact={'from': owner})
     logs = get_logs(tx_hash, c, 'Transfer')
 
     assert c.balanceOf(someone) == 2
     assert len(logs) > 0
     assert logs[0]['args']['_from'] == ZERO_ADDRESS
     assert logs[0]['args']['_to'] == someone
-    assert logs[0]['args']['_tokenId'] == secondTokenId
+    assert logs[0]['args']['_tokenId'] == SECOND_TOKEN_ID
 
 
 def test_burn(c, w3, assert_tx_failed, get_logs):
     owner, operator, someone = w3.eth.accounts[:3]
 
     # burn token without ownership
-    assert_tx_failed(lambda: c.burn(firstTokenId, transact={'from': owner}))
+    assert_tx_failed(lambda: c.burn(FIRST_TOKEN_ID, transact={'from': owner}))
 
-    tx_hash = c.burn(firstTokenId, transact={'from': someone})
+    tx_hash = c.burn(FIRST_TOKEN_ID, transact={'from': someone})
     logs = get_logs(tx_hash, c, 'Transfer')
 
     assert c.balanceOf(someone) == 0
     assert len(logs) > 0
     assert logs[0]['args']['_from'] == someone
     assert logs[0]['args']['_to'] == ZERO_ADDRESS
-    assert logs[0]['args']['_tokenId'] == firstTokenId
+    assert logs[0]['args']['_tokenId'] == FIRST_TOKEN_ID
