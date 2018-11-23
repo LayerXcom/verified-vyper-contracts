@@ -290,7 +290,9 @@ def setApprovalForAll(_operator: address, _approved: bool):
 # @return A boolean that indicates if the operation was successful.
 @public
 def mint(_to: address, _tokenId: uint256) -> bool:
+    # Throws if `msg.sender`` is not the minter
     assert msg.sender == self.minter
+    # Throws if `_to` is zero address
     assert _to != ZERO_ADDRESS
     self._addTokenTo(_to, _tokenId)
     log.Transfer(ZERO_ADDRESS, _to, _tokenId)
