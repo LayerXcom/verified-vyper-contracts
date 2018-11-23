@@ -137,15 +137,10 @@ def getApproved(_tokenId: uint256) -> address:
 # @dev Checks if `_operator` is an approved operator for `_owner`.
 # @param _owner The address that owns the NFTs.
 # @param _operator The address that acts on behalf of the owner.
-@private
-@constant
-def _isApprovedForAll(_owner: address, _operator: address) -> bool:
-    return (self.ownerToOperators[_owner])[_operator]
-
 @public
 @constant
 def isApprovedForAll(_owner: address, _operator: address) -> bool:
-    return self._isApprovedForAll(_owner, _operator)
+    return (self.ownerToOperators[_owner])[_operator]
 
 
 ### TRANSFER FUNCTION HELPERS ###
@@ -159,9 +154,10 @@ def isApprovedForAll(_owner: address, _operator: address) -> bool:
 @constant
 def _isApprovedOrOwner(_spender: address, _tokenId: uint256) -> bool:
     owner: address = self._ownerOf(_tokenId)
-    isOwner: bool = owner == _spender
-    isApproved: bool = _spender == self._getApproved(_tokenId)
-    return (isOwner or isApproved) or self.isApprovedForAll(_spender, owner)
+    spenderIsOwner: bool = owner == _spender
+    spenderIsApproved: bool = _spender == self._getApproved(_tokenId)
+    spenderIsApprovedForAll: bool = (self.ownerToOperators[owner])[_spender]
+    return (spenderIsOwner or spenderIsApproved) or spenderIsApprovedForAll
 
 
 # @dev Throws unless `msg.sender` is the current owner, an authorized operator, or the approved
@@ -268,7 +264,8 @@ def approve(_approved: address, _tokenId: uint256):
     assert _approved != owner
     # check requirements
     senderIsOwner: bool = self.idToOwner[_tokenId] == msg.sender
-    assert (senderIsOwner or self._isApprovedForAll(owner, msg.sender))
+    senderIsApprovedForAll: bool = (self.ownerToOperators[owner])[msg.sender]
+    assert (senderIsOwner or senderIsApprovedForAll)
     # set the approval
     self.idToApprovals[_tokenId] = _approved
     log.Approval(owner, _approved, _tokenId)
