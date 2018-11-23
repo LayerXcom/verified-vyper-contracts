@@ -129,6 +129,89 @@ def test_transferFrom(c, w3, assert_tx_failed, get_logs):
     assert c.balanceOf(operator) == 4
 
 
+def test_safeTransferFrom(c, w3, assert_tx_failed, get_logs, get_contract):
+    someone, operator = w3.eth.accounts[1:3]
+
+    # transfer from zero address
+    assert_tx_failed(lambda: c.safeTransferFrom(
+        ZERO_ADDRESS, operator, SOMEONE_TOKEN_IDS[0], transact={'from': someone}))
+
+    # transfer to zero address
+    assert_tx_failed(lambda: c.safeTransferFrom(
+        someone, ZERO_ADDRESS, SOMEONE_TOKEN_IDS[0], transact={'from': someone}))
+
+    # transfer token without ownership
+    assert_tx_failed(lambda: c.safeTransferFrom(
+        someone, operator, OPERATOR_TOKEN_ID, transact={'from': someone}))
+
+    # transfer invalid token
+    assert_tx_failed(lambda: c.safeTransferFrom(
+        someone, operator, INVALID_TOKEN_ID, transact={'from': someone}))
+
+    # transfer by owner
+    tx_hash = c.safeTransferFrom(
+        someone, operator, SOMEONE_TOKEN_IDS[0], transact={'from': someone})
+
+    logs = get_logs(tx_hash, c, 'Transfer')
+
+    assert len(logs) > 0
+    args = logs[0].args
+    assert args._from == someone
+    assert args._to == operator
+    assert args._tokenId == SOMEONE_TOKEN_IDS[0]
+    assert c.ownerOf(SOMEONE_TOKEN_IDS[0]) == operator
+    assert c.balanceOf(someone) == 2
+    assert c.balanceOf(operator) == 2
+
+    # transfer by approved
+    c.approve(operator, SOMEONE_TOKEN_IDS[1], transact={'from': someone})
+    tx_hash = c.safeTransferFrom(
+        someone, operator, SOMEONE_TOKEN_IDS[1], transact={'from': someone})
+
+    logs = get_logs(tx_hash, c, 'Transfer')
+
+    assert len(logs) > 0
+    args = logs[0].args
+    assert args._from == someone
+    assert args._to == operator
+    assert args._tokenId == SOMEONE_TOKEN_IDS[1]
+    assert c.ownerOf(SOMEONE_TOKEN_IDS[1]) == operator
+    assert c.balanceOf(someone) == 1
+    assert c.balanceOf(operator) == 3
+
+    # transfer by operator
+    c.setApprovalForAll(operator, True,  transact={'from': someone})
+    tx_hash = c.safeTransferFrom(
+        someone, operator, SOMEONE_TOKEN_IDS[2], transact={'from': someone})
+
+    logs = get_logs(tx_hash, c, 'Transfer')
+
+    assert len(logs) > 0
+    args = logs[0].args
+    assert args._from == someone
+    assert args._to == operator
+    assert args._tokenId == SOMEONE_TOKEN_IDS[2]
+    assert c.ownerOf(SOMEONE_TOKEN_IDS[2]) == operator
+    assert c.balanceOf(someone) == 0
+    assert c.balanceOf(operator) == 4
+
+    # Can't transfer to a contract that doesn't implement the receiver code
+    assert_tx_failed(lambda: c.safeTransferFrom(operator, c.address, OPERATOR_TOKEN_ID, transact={'from': operator}))
+
+     # Only to an address that implements that function
+    receiver = get_contract("""
+@public
+def onERC721Received(
+        _operator: address,
+        _from: address,
+        _tokenId: uint256,
+        _data: bytes[1024]
+    ) -> bytes32:
+    return method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
+    """)
+    c.safeTransferFrom(operator, receiver.address, OPERATOR_TOKEN_ID, transact={'from': operator})
+
+
 def test_approve(c, w3, assert_tx_failed, get_logs):
     someone, operator = w3.eth.accounts[1:3]
 
