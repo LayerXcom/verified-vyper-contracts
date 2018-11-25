@@ -62,7 +62,7 @@ def test_isApprovedForAll(c, w3):
     assert c.isApprovedForAll(someone, operator) == True
 
 
-def test_transferFrom(c, w3, assert_tx_failed, get_logs):
+def test_transferFrom_by_owner(c, w3, assert_tx_failed, get_logs):
     someone, operator = w3.eth.accounts[1:3]
 
     # transfer from zero address
@@ -96,6 +96,10 @@ def test_transferFrom(c, w3, assert_tx_failed, get_logs):
     assert c.balanceOf(someone) == 2
     assert c.balanceOf(operator) == 2
 
+
+def test_transferFrom_by_approved(c, w3, get_logs):
+    someone, operator = w3.eth.accounts[1:3]
+
     # transfer by approved
     c.approve(operator, SOMEONE_TOKEN_IDS[1], transact={'from': someone})
     tx_hash = c.transferFrom(
@@ -109,8 +113,12 @@ def test_transferFrom(c, w3, assert_tx_failed, get_logs):
     assert args._to == operator
     assert args._tokenId == SOMEONE_TOKEN_IDS[1]
     assert c.ownerOf(SOMEONE_TOKEN_IDS[1]) == operator
-    assert c.balanceOf(someone) == 1
-    assert c.balanceOf(operator) == 3
+    assert c.balanceOf(someone) == 2
+    assert c.balanceOf(operator) == 2
+
+
+def test_transferFrom_by_operator(c, w3, get_logs):
+    someone, operator = w3.eth.accounts[1:3]
 
     # transfer by operator
     c.setApprovalForAll(operator, True,  transact={'from': someone})
@@ -125,11 +133,11 @@ def test_transferFrom(c, w3, assert_tx_failed, get_logs):
     assert args._to == operator
     assert args._tokenId == SOMEONE_TOKEN_IDS[2]
     assert c.ownerOf(SOMEONE_TOKEN_IDS[2]) == operator
-    assert c.balanceOf(someone) == 0
-    assert c.balanceOf(operator) == 4
+    assert c.balanceOf(someone) == 2
+    assert c.balanceOf(operator) == 2
 
 
-def test_safeTransferFrom(c, w3, assert_tx_failed, get_logs, get_contract):
+def test_safeTransferFrom_by_owner(c, w3, assert_tx_failed, get_logs):
     someone, operator = w3.eth.accounts[1:3]
 
     # transfer from zero address
@@ -163,6 +171,10 @@ def test_safeTransferFrom(c, w3, assert_tx_failed, get_logs, get_contract):
     assert c.balanceOf(someone) == 2
     assert c.balanceOf(operator) == 2
 
+
+def test_safeTransferFrom_by_approved(c, w3, get_logs):
+    someone, operator = w3.eth.accounts[1:3]
+
     # transfer by approved
     c.approve(operator, SOMEONE_TOKEN_IDS[1], transact={'from': someone})
     tx_hash = c.safeTransferFrom(
@@ -176,8 +188,12 @@ def test_safeTransferFrom(c, w3, assert_tx_failed, get_logs, get_contract):
     assert args._to == operator
     assert args._tokenId == SOMEONE_TOKEN_IDS[1]
     assert c.ownerOf(SOMEONE_TOKEN_IDS[1]) == operator
-    assert c.balanceOf(someone) == 1
-    assert c.balanceOf(operator) == 3
+    assert c.balanceOf(someone) == 2
+    assert c.balanceOf(operator) == 2
+
+
+def test_safeTransferFrom_by_operator(c, w3, get_logs):
+    someone, operator = w3.eth.accounts[1:3]
 
     # transfer by operator
     c.setApprovalForAll(operator, True,  transact={'from': someone})
@@ -192,11 +208,15 @@ def test_safeTransferFrom(c, w3, assert_tx_failed, get_logs, get_contract):
     assert args._to == operator
     assert args._tokenId == SOMEONE_TOKEN_IDS[2]
     assert c.ownerOf(SOMEONE_TOKEN_IDS[2]) == operator
-    assert c.balanceOf(someone) == 0
-    assert c.balanceOf(operator) == 4
+    assert c.balanceOf(someone) == 2
+    assert c.balanceOf(operator) == 2
+
+
+def test_safeTransferFrom_to_contract(c, w3, assert_tx_failed, get_logs, get_contract):
+    someone = w3.eth.accounts[1]
 
     # Can't transfer to a contract that doesn't implement the receiver code
-    assert_tx_failed(lambda: c.safeTransferFrom(operator, c.address, OPERATOR_TOKEN_ID, transact={'from': operator}))
+    assert_tx_failed(lambda: c.safeTransferFrom(someone, c.address, SOMEONE_TOKEN_IDS[0], transact={'from': someone}))
 
      # Only to an address that implements that function
     receiver = get_contract("""
@@ -209,7 +229,7 @@ def onERC721Received(
     ) -> bytes32:
     return method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
     """)
-    c.safeTransferFrom(operator, receiver.address, OPERATOR_TOKEN_ID, transact={'from': operator})
+    c.safeTransferFrom(someone, receiver.address, SOMEONE_TOKEN_IDS[0], transact={'from': someone})
 
 
 def test_approve(c, w3, assert_tx_failed, get_logs):
