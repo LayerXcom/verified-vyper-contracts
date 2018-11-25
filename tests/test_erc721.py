@@ -99,7 +99,7 @@ def test_transferFrom(c, w3, assert_tx_failed, get_logs):
     # transfer by approved
     c.approve(operator, SOMEONE_TOKEN_IDS[1], transact={'from': someone})
     tx_hash = c.transferFrom(
-        someone, operator, SOMEONE_TOKEN_IDS[1], transact={'from': someone})
+        someone, operator, SOMEONE_TOKEN_IDS[1], transact={'from': operator})
 
     logs = get_logs(tx_hash, c, 'Transfer')
 
@@ -115,7 +115,7 @@ def test_transferFrom(c, w3, assert_tx_failed, get_logs):
     # transfer by operator
     c.setApprovalForAll(operator, True,  transact={'from': someone})
     tx_hash = c.transferFrom(
-        someone, operator, SOMEONE_TOKEN_IDS[2], transact={'from': someone})
+        someone, operator, SOMEONE_TOKEN_IDS[2], transact={'from': operator})
 
     logs = get_logs(tx_hash, c, 'Transfer')
 
@@ -166,7 +166,7 @@ def test_safeTransferFrom(c, w3, assert_tx_failed, get_logs, get_contract):
     # transfer by approved
     c.approve(operator, SOMEONE_TOKEN_IDS[1], transact={'from': someone})
     tx_hash = c.safeTransferFrom(
-        someone, operator, SOMEONE_TOKEN_IDS[1], transact={'from': someone})
+        someone, operator, SOMEONE_TOKEN_IDS[1], transact={'from': operator})
 
     logs = get_logs(tx_hash, c, 'Transfer')
 
@@ -182,7 +182,7 @@ def test_safeTransferFrom(c, w3, assert_tx_failed, get_logs, get_contract):
     # transfer by operator
     c.setApprovalForAll(operator, True,  transact={'from': someone})
     tx_hash = c.safeTransferFrom(
-        someone, operator, SOMEONE_TOKEN_IDS[2], transact={'from': someone})
+        someone, operator, SOMEONE_TOKEN_IDS[2], transact={'from': operator})
 
     logs = get_logs(tx_hash, c, 'Transfer')
 
