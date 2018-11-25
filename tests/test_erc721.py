@@ -229,7 +229,18 @@ def onERC721Received(
     ) -> bytes32:
     return method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
     """)
-    c.safeTransferFrom(someone, receiver.address, SOMEONE_TOKEN_IDS[0], transact={'from': someone})
+    tx_hash = c.safeTransferFrom(someone, receiver.address, SOMEONE_TOKEN_IDS[0], transact={'from': someone})
+
+    logs = get_logs(tx_hash, c, 'Transfer')
+
+    assert len(logs) > 0
+    args = logs[0].args
+    assert args._from == someone
+    assert args._to == receiver.address
+    assert args._tokenId == SOMEONE_TOKEN_IDS[0]
+    assert c.ownerOf(SOMEONE_TOKEN_IDS[0]) == receiver.address
+    assert c.balanceOf(someone) == 2
+    assert c.balanceOf(receiver.address) == 1
 
 
 def test_approve(c, w3, assert_tx_failed, get_logs):
