@@ -161,7 +161,7 @@ def _isApprovedOrOwner(_spender: address, _tokenId: uint256) -> bool:
     owner: address = self._ownerOf(_tokenId)
     isOwner: bool = owner == _spender
     isApproved: bool = _spender == self._getApproved(_tokenId)
-    return (isOwner or isApproved) or self.isApprovedForAll(_spender, owner)
+    return (isOwner or isApproved) or self.isApprovedForAll(owner, _spender)
 
 
 # @dev Throws unless `msg.sender` is the current owner, an authorized operator, or the approved
