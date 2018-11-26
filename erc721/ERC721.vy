@@ -275,11 +275,14 @@ def approve(_approved: address, _tokenId: uint256):
 
 # @dev Enables or disables approval for a third party ("operator") to manage all of
 #      `msg.sender`'s assets. It also emits the ApprovalForAll event.
+#      Throws if `_operator` is the `msg.sender`. (NOTE: This is not written the EIP)
 # @notice This works even if sender doesn't own any tokens at the time.
 # @param _operator Address to add to the set of authorized operators.
 # @param _isApproved True if the operators is approved, false to revoke approval.
 @public
 def setApprovalForAll(_operator: address, _approved: bool):
+    # Throws if `_operator` is the `msg.sender`
+    assert _operator != msg.sender
     self.ownerToOperators[msg.sender][_operator] = _approved
     log.ApprovalForAll(msg.sender, _operator, _approved)
 
