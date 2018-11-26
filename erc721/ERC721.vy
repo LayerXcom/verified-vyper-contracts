@@ -314,7 +314,7 @@ def burn(_tokenId: uint256):
     assert self._isApprovedOrOwner(msg.sender, _tokenId)
     owner: address = self.idToOwner[_tokenId]
     # Throws if `_tokenId` is not a valid NFT
-    assert owner == ZERO_ADDRESS
+    assert owner != ZERO_ADDRESS
     self._clearApproval(owner, _tokenId)
     self._removeTokenFrom(owner, _tokenId)
     log.Transfer(owner, ZERO_ADDRESS, _tokenId)

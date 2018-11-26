@@ -69,7 +69,7 @@
 
         <accounts>
           <account>
-            <acctID> ACCT_ID </acctID>
+            <acctID> ACCT_ID:Int </acctID>
             <balance> _ </balance>
             <code> #parseByteStack({CODE}) </code>
             <storage>
