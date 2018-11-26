@@ -272,10 +272,6 @@ def test_setApprovalForAll(c, w3, assert_tx_failed, get_logs):
     someone, operator = w3.eth.accounts[1:3]
     approved = True
 
-    # setApprovalForAll to zero address
-    assert_tx_failed(lambda: c.setApprovalForAll(
-        ZERO_ADDRESS, approved, transact={'from': someone}))
-
     tx_hash = c.setApprovalForAll(operator, True, transact={'from': someone})
     logs = get_logs(tx_hash, c, 'ApprovalForAll')
 
