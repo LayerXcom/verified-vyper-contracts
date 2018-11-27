@@ -1,6 +1,10 @@
 # FVyper
 [![CircleCI](https://circleci.com/gh/LayerXcom/verified-vyper-contracts.svg?style=svg)](https://circleci.com/gh/LayerXcom/verified-vyper-contracts)  
-Formally Verified Vyper Contracts
+Formally Verified Vyper Contracts  
+
+## About FVyper
+FVyper is a collection of formally verified, useful Vyper programs.  
+See [roadmap](https://github.com/LayerXcom/verified-vyper-contracts/issues/5).
 
 ## How to get started
 
