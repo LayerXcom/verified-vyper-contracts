@@ -1,4 +1,5 @@
 # FVyper
+[![CircleCI](https://circleci.com/gh/LayerXcom/verified-vyper-contracts.svg?style=svg)](https://circleci.com/gh/LayerXcom/verified-vyper-contracts)  
 Formally Verified Vyper Contracts
 
 ## How to get started
