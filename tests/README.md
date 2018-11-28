@@ -1,25 +1,28 @@
 ## How to get started
 
-Python 3.6 is required.
-For settting up Python 3 environment, [virtualenv](https://virtualenv.pypa.io/en/stable/) is commonly used, like:
-
-```
-# once
-virtualenv -p python3 venv
-
-# each session
-. venv/bin/activate
-```
-
-Then install required packages:
+You need to install required python packages:
 
 ```
 pip install -r requirements.txt
 ```
 
+(Python 3.6 is required)
+
 ## Running the tests
 
-You can run the tests:
+You can run a test like:
+
+```
+pytest erc721/test_erc721.py
+```
+
+Or specific test case like:
+
+```
+pytest erc721/test_erc721.py::test_approve
+```
+
+You can also run the full test suite with:
 
 ```
 pytest

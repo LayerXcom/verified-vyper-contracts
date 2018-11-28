@@ -6,10 +6,10 @@ Formally Verified Vyper Contracts
 FVyper is a collection of formally verified, useful Vyper programs.  
 See [roadmap](https://github.com/LayerXcom/verified-vyper-contracts/issues/5).
 
-## Structure of this project
+## Directory structure
 The `/contracts` directory contains vyper contracts we use in formal verification (`/k` directory) and unit testing ( `/tests` directory).
 
-The `/k` directory contains formal verification specs using [K Framework](https://github.com/kframework/k).
+The `/k` directory contains files to do formal verification with [K Framework](https://github.com/kframework/k).
 
 The `/tests` directory contains unit tests.
 
