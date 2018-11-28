@@ -12,7 +12,7 @@ INVALID_INTERFACE_ID = '0x000000000000000000000000000000000000000000000000000000
 
 @pytest.fixture
 def c(get_contract, w3):
-    with open('./erc721/ERC721.vy') as f:
+    with open('../contracts/erc721/ERC721.vy') as f:
         code = f.read()
     c = get_contract(code)
     minter, someone, operator = w3.eth.accounts[:3]

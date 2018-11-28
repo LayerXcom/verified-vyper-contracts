@@ -1,11 +1,14 @@
 version: 2
 jobs:
   build:
+    working_directory: ~/verified-vyper-contracts/tests
+
     docker:
       - image: python:3.6.7
 
     steps:
-      - checkout
+      - checkout:
+          path: ~/verified-vyper-contracts
       - run: apt-get update
       - run:
           name: Install dependencies
