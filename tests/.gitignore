@@ -1,7 +1,3 @@
-/.build/*
-!/.build/pandoc-tangle
-/specs/*
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
