@@ -176,13 +176,6 @@ Code sugar to represent byte arrays with concrete size but symbolic data.
     rule keccak(WS) => keccakIntList(byteStack2IntList(WS))
       requires ( notBool #isConcrete(WS) )
        andBool ( #sizeWordStack(WS) ==Int 32 orBool #sizeWordStack(WS) ==Int 64 )
-
-    // inverse of intList2ByteStack of edsl.md
-    syntax IntList ::= byteStack2IntList ( WordStack )       [function]
-                     | byteStack2IntList ( WordStack , Int ) [function]
-    rule byteStack2IntList ( WS ) => byteStack2IntList ( WS , #sizeWordStack(WS) /Int 32 ) requires #sizeWordStack(WS) %Int 32 ==Int 0
-    rule byteStack2IntList ( WS , N ) => #asWord ( WS [ 0 .. 32 ] ) byteStack2IntList ( #drop(32, WS) , N -Int 1 ) requires N >Int 1
-    rule byteStack2IntList ( WS , 1 ) => #asWord ( WS [ 0 .. 32 ] ) .IntList
 ```
 
 ### Integer Expression Simplification Rules
@@ -240,6 +233,15 @@ These rules are specific to reasoning about EVM programs.
     rule A -Int (#if C #then B1 #else B2 #fi) => #if C #then (A -Int B1) #else (A -Int B2) #fi
     rule (#if C #then B1 #else B2 #fi) -Int A => #if C #then (B1 -Int A) #else (B2 -Int A) #fi
 ```
+
+Operator direction normalization rules. Required to reduce the number of forms of inequalities that can be matched by 
+general lemmas. We chose to keep `<Int` and `<=Int` because those operators are used in all range lemmas and in
+`#range` macros. Operators `>Int` and `>=Int` are still allowed anywhere except rules LHS.
+In all other places they will be matched and rewritten by rules below.
+```k
+    rule X >Int Y => Y <Int X
+    rule X >=Int Y => Y <=Int X
+``` 
 
 ### Boolean
 
@@ -316,11 +318,18 @@ The other rules are similar.
 
 ```k
     rule X <=Int maxUInt256 => X <Int pow256
+    rule X <=Int maxUInt160 => X <Int pow160
     rule X <=Int 255        => X <Int 256
     
     //Range transformation, required for example for chop reduction rules below.
     rule X <Int pow256 => true
       requires X <Int 256
+      
+    rule X <Int pow256 => true
+      requires X <Int pow160
+      
+    rule 0 <=Int X => true
+      requires 0 <Int X
 ```
 
 ### `chop` Reduction
@@ -334,7 +343,7 @@ The other rules are similar.
 These lemmas abstract some properties about `#sizeWordStack`:
 
 ```k
-    rule #sizeWordStack ( _ , _ ) >=Int 0 => true [smt-lemma]
+    rule 0 <=Int #sizeWordStack ( _ , _ ) => true [smt-lemma]
     rule #sizeWordStack ( WS , N:Int )
       => #sizeWordStack ( WS , 0 ) +Int N
       requires N =/=K 0
