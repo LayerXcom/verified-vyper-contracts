@@ -19,13 +19,17 @@ rule #hashedLocation("Vyper", BASE, OFFSET OFFSETS) => #hashedLocation("Vyper", 
 
 #### Boolean
 To handle bools in stack, we need to add these rules.
-`.build/evm-semantics/.build/java/data.k` (line 109)
+
+- `.build/evm-semantics/.build/java/data.k` (line 109)
+
 ```| #rangeBool ( Int )```
 
-`.build/evm-semantics/.build/java/data.k` (line 121)
+- `.build/evm-semantics/.build/java/data.k` (line 121)
+
 ```rule #rangeBool    ( X ) => #range ( 0 <= X <= 1 ) [macro]```
 
-`.build/evm-semantics/.build/java/edsl.k` L318
+- `.build/evm-semantics/.build/java/edsl.k` (line 318)
+
 ```
 syntax WordStack ::= bool2ByteStack( Int, Int ) [function]
 // ------------------------------------------------------------
