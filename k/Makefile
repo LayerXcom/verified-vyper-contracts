@@ -4,8 +4,8 @@
 specs_dir:=specs
 build_dir:=.build
 
-K_VERSION   :=57ad13d91283a9b7b3e0aa604236f1f27d4f7f25
-KEVM_VERSION:=9a409babcd9b77a0f9a30f52350e4c5d46e6b086
+K_VERSION   :=b65568ade007d54dd21667f4f56f2d7471bb6596
+KEVM_VERSION:=5d3bbb6d9dd3a2913201071937cb3f00d66832b0
 
 .PHONY: all clean k kevm clean-kevm
 
@@ -109,7 +109,7 @@ erc721_tmpls:=erc721/module-tmpl.k erc721/spec-tmpl.k
 # Testing
 # -------
 
-TEST:=$(k_bin)/kprove -v -d $(kevm_repo_dir)/.build/java -m VERIFICATION --z3-executable --z3-impl-timeout 500
+TEST:=$(k_bin)/kprove -v -d $(kevm_repo_dir)/.build/java -m VERIFICATION --z3-impl-timeout 500
 
 test_files:=$(wildcard specs/*/*-spec.k)
 
