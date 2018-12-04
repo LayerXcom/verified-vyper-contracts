@@ -19,24 +19,6 @@ def __init__(_name: bytes32, _symbol: bytes32, _decimals: uint256, _supply: uint
     log.Transfer(ZERO_ADDRESS, _sender, _supply)
 
 @public
-@payable
-def deposit():
-    _value: uint256(wei) = msg.value
-    _sender: address = msg.sender
-    self.balances[_sender] = self.balances[_sender] + _value
-    self.total_supply = self.total_supply + _value
-    log.Transfer(ZERO_ADDRESS, _sender, _value)
-
-@public
-def withdraw(_value : uint256(wei)) -> bool:
-    _sender: address = msg.sender
-    self.balances[_sender] = self.balances[_sender] - _value
-    self.total_supply = self.total_supply - _value
-    send(_sender, _value)
-    log.Transfer(_sender, ZERO_ADDRESS, _value)
-    return True
-
-@public
 @constant
 def totalSupply() -> uint256(wei):
     return self.total_supply
