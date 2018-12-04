@@ -92,8 +92,12 @@ erc721_files:=balanceOf-success-spec.k \
 			  ownerOf-failure-spec.k \
 			  getApproved-success-spec.k \
 			  getApproved-failure-spec.k \
-			  isApprovedForAll-spec.k
-
+			  isApprovedForAll-spec.k \
+			  isApprovedForAll-spec.k \
+ 			  transferFrom-success-1-spec.k \
+			  transferFrom-success-2-spec.k \
+			  transferFrom-failure-1-spec.k \
+			  transferFrom-failure-2-spec.k
 
 erc721: $(patsubst %, $(specs_dir)/erc721/%, $(erc721_files)) $(specs_dir)/lemmas.k
 
