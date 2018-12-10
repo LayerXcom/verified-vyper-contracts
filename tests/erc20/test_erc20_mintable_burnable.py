@@ -148,6 +148,57 @@ def test_transferFrom_and_Allowance(c, w3, assert_tx_failed):
     assert c.allowance(a2, a1) == 5
 
 
+def test_burnFrom_and_Allowance(c, w3, assert_tx_failed):
+    minter, a1, a2, a3 = w3.eth.accounts[0:4]
+    assert_tx_failed(lambda: c.burn(1, transact={'from': a2}))
+    c.mint(a1, 1, transact={'from': minter})
+    c.mint(a2, 1, transact={'from': minter})
+    c.burn(1, transact={'from': a1})
+    # This should fail; no allowance or balance (0 always succeeds)
+    assert_tx_failed(lambda: c.burnFrom(a1, 1, transact={'from': a2}))
+    c.burnFrom(a1, 0, transact={'from': a2})
+    # Correct call to approval should update allowance (but not for reverse pair)
+    c.approve(a2, 1, transact={'from': a1})
+    assert c.allowance(a1, a2) == 1
+    assert c.allowance(a2, a1) == 0
+    # transferFrom should succeed when allowed, fail with wrong sender
+    assert_tx_failed(lambda: c.burnFrom(a2, 1, transact={'from': a3}))
+    assert c.balanceOf(a2) == 1
+    c.approve(a1, 1, transact={'from': a2})
+    c.burnFrom(a2, 1, transact={'from': a1})
+    # Allowance should be correctly updated after transferFrom
+    assert c.allowance(a2, a1) == 0
+    # transferFrom with no funds should fail despite approval
+    c.approve(a1, 1, transact={'from': a2})
+    assert c.allowance(a2, a1) == 1
+    assert_tx_failed(lambda: c.burnFrom(a2, 1, transact={'from': a1}))
+    # 0-approve should not change balance or allow transferFrom to change balance
+    c.mint(a2, 1, transact={'from': minter})
+    assert c.allowance(a2, a1) == 1
+    c.approve(a1, 0, transact={'from': a2})
+    assert c.allowance(a2, a1) == 0
+    c.approve(a1, 0, transact={'from': a2})
+    assert c.allowance(a2, a1) == 0
+    assert_tx_failed(lambda: c.burnFrom(a2, 1, transact={'from': a1}))
+    # Test that if non-zero approval exists, 0-approval is NOT required to proceed
+    # a non-conformant implementation is described in countermeasures at
+    # https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM/edit#heading=h.m9fhqynw2xvt
+    # the final spec insists on NOT using this behavior
+    assert c.allowance(a2, a1) == 0
+    c.approve(a1, 1, transact={'from': a2})
+    assert c.allowance(a2, a1) == 1
+    c.approve(a1, 2, transact={'from': a2})
+    assert c.allowance(a2, a1) == 2
+    # Check that approving 0 then amount also works
+    c.approve(a1, 0, transact={'from': a2})
+    assert c.allowance(a2, a1) == 0
+    c.approve(a1, 5, transact={'from': a2})
+    assert c.allowance(a2, a1) == 5
+    # Check that burnFrom to ZERO_ADDRESS failed
+    assert_tx_failed(lambda: c.burnFrom(
+        ZERO_ADDRESS, 0, transact={'from': a1}))
+
+
 def test_raw_logs(c, w3, get_log_args):
     minter, a1, a2, a3 = w3.eth.accounts[0:4]
 
