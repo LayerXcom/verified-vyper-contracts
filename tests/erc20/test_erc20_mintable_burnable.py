@@ -128,7 +128,7 @@ def test_maxInts(c, w3, assert_tx_failed):
     c.transferFrom(a2, a1, MAX_UINT256, transact={'from': a1})
     assert c.balanceOf(a1) == MAX_UINT256
     assert c.balanceOf(a2) == 0
-    # Check that max amount can be burnt
+    # Check that max amount can be burned
     c.burn(MAX_UINT256, transact={'from': a1})
     assert c.balanceOf(a1) == 0
 
