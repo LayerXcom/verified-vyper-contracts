@@ -96,6 +96,10 @@ def test_transfer(c, w3, assert_tx_failed):
     c.transfer(a1, 0, transact={'from': a2})
 
 
+def test_maxInts(c, w3):
+    pass
+
+
 def test_transferFrom_and_Allowance(c, w3, assert_tx_failed):
     minter, a1, a2, a3 = w3.eth.accounts[0:4]
     assert_tx_failed(lambda: c.burn(1, transact={'from': a2}))
@@ -207,3 +211,7 @@ def test_raw_logs(c, w3, get_log_args):
     assert args._from == a2
     assert args._to == a3
     assert args._value == 0
+
+
+def test_failed_send_in_withdraw(c, w3):
+    pass
