@@ -25,7 +25,8 @@ def c_bad(get_contract, w3, bytes_helper):
         code = f.read()
     name = bytes_helper("Vypercoin", 32)
     symbol = bytes_helper("VYP", 32)
-    bad_code = code.replace("self.total_supply = self.total_supply + _value", "")
+    bad_code = code.replace("self.total_supply = self.total_supply + _value", "") \
+                .replace("self.total_supply = self.total_supply - _value", "")
     c = get_contract(bad_code, name, symbol, 0, 0)
     return c
 
@@ -322,4 +323,13 @@ def test_bad_transfer(c_bad, w3, assert_tx_failed):
     c_bad.transfer(a2, MAX_UINT256 - 1, transact={'from': a1})
     assert c_bad.balanceOf(a1) == 1
     assert c_bad.balanceOf(a2) == MAX_UINT256
+
+
+def test_bad_burn(c_bad, w3, assert_tx_failed):
+    # Ensure burn fails if it would otherwise underflow balance when totalSupply is corrupted
+    minter, a1 = w3.eth.accounts[0:2]
+    assert c_bad.balanceOf(a1) == 0
+    c_bad.mint(a1, 2, transact={'from': minter})
+    assert c_bad.balanceOf(a1) == 2
+    assert_tx_failed(lambda: c_bad.burn(3, transact={'from': a1}))
 
