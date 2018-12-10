@@ -1,6 +1,11 @@
 import pytest
 
+from web3.exceptions import (
+    ValidationError
+)
+
 ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+MAX_UINT256 = (2 ** 256) - 1  # Max uint256 value
 
 
 @pytest.fixture
@@ -96,8 +101,36 @@ def test_transfer(c, w3, assert_tx_failed):
     c.transfer(a1, 0, transact={'from': a2})
 
 
-def test_maxInts(c, w3):
-    pass
+def test_maxInts(c, w3, assert_tx_failed):
+    minter, a1, a2 = w3.eth.accounts[0:3]
+    c.mint(a1, MAX_UINT256, transact={'from': minter})
+    assert c.balanceOf(a1) == MAX_UINT256
+    assert_tx_failed(lambda: c.mint(a1, 1, transact={'from': a1}))
+    assert_tx_failed(lambda: c.mint(a1, MAX_UINT256, transact={'from': a1}))
+    # Check that totalSupply cannot overflow, even when mint to other account
+    assert_tx_failed(lambda: c.mint(a2, 1, transact={'from': minter}))
+    # Check that corresponding mint is allowed after burn
+    c.burn(1, transact={'from': a1})
+    c.mint(a2, 1, transact={'from': minter})
+    assert_tx_failed(lambda: c.mint(a2, 1, transact={'from': minter}))
+    c.transfer(a1, 1, transact={'from': a2})
+    # Assert that after obtaining max number of tokens, a1 can transfer those but no more
+    assert c.balanceOf(a1) == MAX_UINT256
+    c.transfer(a2, MAX_UINT256, transact={'from': a1})
+    assert c.balanceOf(a2) == MAX_UINT256
+    assert c.balanceOf(a1) == 0
+    # [ next line should never work in EVM ]
+    with pytest.raises(ValidationError):
+        c.transfer(a1, MAX_UINT256 + 1, transact={'from': a2})
+    # Check approve/allowance w max possible token values
+    assert c.balanceOf(a2) == MAX_UINT256
+    c.approve(a1, MAX_UINT256, transact={'from': a2})
+    c.transferFrom(a2, a1, MAX_UINT256, transact={'from': a1})
+    assert c.balanceOf(a1) == MAX_UINT256
+    assert c.balanceOf(a2) == 0
+    # Check that max amount can be burned
+    c.burn(MAX_UINT256, transact={'from': a1})
+    assert c.balanceOf(a1) == 0
 
 
 def test_transferFrom_and_Allowance(c, w3, assert_tx_failed):
