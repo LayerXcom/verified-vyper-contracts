@@ -20,6 +20,7 @@ def c(get_contract, w3, bytes_helper):
 
 @pytest.fixture
 def c_bad(get_contract, w3, bytes_helper):
+    # Bad contract is used for overflow checks on totalSupply corrupted
     with open('../contracts/erc20/ERC20MintableBurnable.vy') as f:
         code = f.read()
     name = bytes_helper("Vypercoin", 32)
@@ -310,3 +311,15 @@ def test_raw_logs(c, w3, get_log_args):
 
 def test_failed_send_in_withdraw(c, w3):
     pass
+
+
+def test_bad_transfer(c_bad, w3, assert_tx_failed):
+    # Ensure transfer fails if it would otherwise overflow balance when totalSupply is corrupted
+    minter, a1, a2 = w3.eth.accounts[0:3]
+    c_bad.mint(a1, MAX_UINT256, transact={'from': minter})
+    c_bad.mint(a2, 1, transact={'from': minter})
+    assert_tx_failed(lambda: c_bad.transfer(a1, 1, transact={'from': a2}))
+    c_bad.transfer(a2, MAX_UINT256 - 1, transact={'from': a1})
+    assert c_bad.balanceOf(a1) == 1
+    assert c_bad.balanceOf(a2) == MAX_UINT256
+
