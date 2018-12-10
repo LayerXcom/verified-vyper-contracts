@@ -12,8 +12,8 @@ MAX_UINT256 = (2 ** 256) - 1  # Max uint256 value
 def c(get_contract, w3, bytes_helper):
     with open('../contracts/erc20/ERC20MintableBurnable.vy') as f:
         code = f.read()
-    name = bytes_helper("name", 32)
-    symbol = bytes_helper("sym", 32)
+    name = bytes_helper("Vypercoin", 32)
+    symbol = bytes_helper("VYP", 32)
     c = get_contract(code, name, symbol, 0, 0)
     return c
 
