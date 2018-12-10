@@ -333,3 +333,15 @@ def test_bad_burn(c_bad, w3, assert_tx_failed):
     assert c_bad.balanceOf(a1) == 2
     assert_tx_failed(lambda: c_bad.burn(3, transact={'from': a1}))
 
+
+def test_bad_transferFrom(c_bad, w3, assert_tx_failed):
+    # Ensure transferFrom fails if it would otherwise overflow balance when totalSupply is corrupted
+    minter, a1, a2 = w3.eth.accounts[0:3]
+    c_bad.mint(a1, MAX_UINT256, transact={'from': minter})
+    c_bad.mint(a2, 1, transact={'from': minter})
+    c_bad.approve(a1, 1, transact={'from': a2})
+    assert_tx_failed(lambda: c_bad.transferFrom(a2, a1, 1, transact={'from': a1}))
+    c_bad.approve(a2, MAX_UINT256 - 1, transact={'from': a1})
+    assert c_bad.allowance(a1, a2) == MAX_UINT256 - 1
+    c_bad.transferFrom(a1, a2, MAX_UINT256 - 1, transact={'from': a2})
+    assert c_bad.balanceOf(a2) == MAX_UINT256
