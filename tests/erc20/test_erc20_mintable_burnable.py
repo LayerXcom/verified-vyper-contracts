@@ -19,6 +19,17 @@ def c(get_contract, w3, bytes_helper):
 
 
 @pytest.fixture
+def c_bad(get_contract, w3, bytes_helper):
+    with open('../contracts/erc20/ERC20MintableBurnable.vy') as f:
+        code = f.read()
+    name = bytes_helper("Vypercoin", 32)
+    symbol = bytes_helper("VYP", 32)
+    bad_code = code.replace("self.total_supply = self.total_supply + _value", "")
+    c = get_contract(bad_code, name, symbol, 0, 0)
+    return c
+
+
+@pytest.fixture
 def get_log_args(get_logs):
     def get_log_args(tx_hash, c, event_name):
         logs = get_logs(tx_hash, c, event_name)
