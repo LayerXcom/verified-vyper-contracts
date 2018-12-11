@@ -46,25 +46,25 @@ workflows:
                 only:
                   - /erc20\/.*/
                   - master
-                  - test
+                  - kprove_and_test_for_all
         - erc721test:
             filters:
               branches:
                 only:
                   - /erc721\/.*/
                   - master
-                  - test
+                  - kprove_and_test_for_all
         - erc20kprove:
             filters:
               branches:
                 only:
                   - /erc20\/.*/
                   - master
-                  - test
+                  - kprove_and_test_for_all
         - erc721kprove:
             filters:
               branches:
                 only:
                   - /erc721\/.*/
                   - master
-                  - test
+                  - kprove_and_test_for_all
