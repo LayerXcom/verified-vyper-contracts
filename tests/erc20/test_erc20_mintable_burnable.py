@@ -310,10 +310,6 @@ def test_raw_logs(c, w3, get_log_args):
     assert args._value == 0
 
 
-def test_failed_send_in_withdraw(c, w3):
-    pass
-
-
 def test_bad_transfer(c_bad, w3, assert_tx_failed):
     # Ensure transfer fails if it would otherwise overflow balance when totalSupply is corrupted
     minter, a1, a2 = w3.eth.accounts[0:3]
