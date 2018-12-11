@@ -19,6 +19,19 @@ def c(get_contract, w3, bytes_helper):
 
 
 @pytest.fixture
+def c_bad(get_contract, w3, bytes_helper):
+    # Bad contract is used for overflow checks on totalSupply corrupted
+    with open('../contracts/erc20/ERC20MintableBurnable.vy') as f:
+        code = f.read()
+    name = bytes_helper("Vypercoin", 32)
+    symbol = bytes_helper("VYP", 32)
+    bad_code = code.replace("self.total_supply = self.total_supply + _value", "") \
+                .replace("self.total_supply = self.total_supply - _value", "")
+    c = get_contract(bad_code, name, symbol, 0, 0)
+    return c
+
+
+@pytest.fixture
 def get_log_args(get_logs):
     def get_log_args(tx_hash, c, event_name):
         logs = get_logs(tx_hash, c, event_name)
@@ -299,3 +312,36 @@ def test_raw_logs(c, w3, get_log_args):
 
 def test_failed_send_in_withdraw(c, w3):
     pass
+
+
+def test_bad_transfer(c_bad, w3, assert_tx_failed):
+    # Ensure transfer fails if it would otherwise overflow balance when totalSupply is corrupted
+    minter, a1, a2 = w3.eth.accounts[0:3]
+    c_bad.mint(a1, MAX_UINT256, transact={'from': minter})
+    c_bad.mint(a2, 1, transact={'from': minter})
+    assert_tx_failed(lambda: c_bad.transfer(a1, 1, transact={'from': a2}))
+    c_bad.transfer(a2, MAX_UINT256 - 1, transact={'from': a1})
+    assert c_bad.balanceOf(a1) == 1
+    assert c_bad.balanceOf(a2) == MAX_UINT256
+
+
+def test_bad_burn(c_bad, w3, assert_tx_failed):
+    # Ensure burn fails if it would otherwise underflow balance when totalSupply is corrupted
+    minter, a1 = w3.eth.accounts[0:2]
+    assert c_bad.balanceOf(a1) == 0
+    c_bad.mint(a1, 2, transact={'from': minter})
+    assert c_bad.balanceOf(a1) == 2
+    assert_tx_failed(lambda: c_bad.burn(3, transact={'from': a1}))
+
+
+def test_bad_transferFrom(c_bad, w3, assert_tx_failed):
+    # Ensure transferFrom fails if it would otherwise overflow balance when totalSupply is corrupted
+    minter, a1, a2 = w3.eth.accounts[0:3]
+    c_bad.mint(a1, MAX_UINT256, transact={'from': minter})
+    c_bad.mint(a2, 1, transact={'from': minter})
+    c_bad.approve(a1, 1, transact={'from': a2})
+    assert_tx_failed(lambda: c_bad.transferFrom(a2, a1, 1, transact={'from': a1}))
+    c_bad.approve(a2, MAX_UINT256 - 1, transact={'from': a1})
+    assert c_bad.allowance(a1, a2) == MAX_UINT256 - 1
+    c_bad.transferFrom(a1, a2, MAX_UINT256 - 1, transact={'from': a2})
+    assert c_bad.balanceOf(a2) == MAX_UINT256
