@@ -120,8 +120,7 @@ def _burn(_to: address, _value: uint256(wei)):
     log.Transfer(_to, ZERO_ADDRESS, _value)
 
 
-# @dev Burn an amount of the token of a given account.
-# @param _to The account whose tokens will be burned.
+# @dev Burn an amount of the token of msg.sender.
 # @param _value The amount that will be burned.
 @public
 def burn(_value: uint256(wei)):
