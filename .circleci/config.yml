@@ -1,21 +1,70 @@
 version: 2
 jobs:
-  build:
+  erc20test:
     working_directory: ~/verified-vyper-contracts/tests
-
     docker:
       - image: python:3.6.7
-
     steps:
       - checkout:
           path: ~/verified-vyper-contracts
-      - run: apt-get update
-      - run:
-          name: Install dependencies
-          command: pip install -r requirements.txt
-      - run:
-          name: Run tests
-          command: pytest
-      - run:
-          name: Lint
-          command: flake8
+      - run: ./test.sh erc20
+
+  erc721test:
+    working_directory: ~/verified-vyper-contracts/tests
+    docker:
+      - image: python:3.6.7
+    steps:
+      - checkout:
+          path: ~/verified-vyper-contracts
+      - run: ./test.sh erc721
+
+  erc20kprove:
+    working_directory: ~/verified-vyper-contracts/k
+    docker:
+      - image: ubuntu:18.04
+    steps:
+      - checkout:
+          path: ~/verified-vyper-contracts
+      - run: ./test.sh erc20
+
+  erc721kprove:
+    working_directory: ~/verified-vyper-contracts/k
+    docker:
+      - image: ubuntu:18.04
+    steps:
+      - checkout:
+          path: ~/verified-vyper-contracts
+      - run: ./test.sh erc721
+
+workflows:
+    version: 2
+    build:
+      jobs:
+        - erc20test:
+            filters:
+              branches:
+                only:
+                  - /erc20\/.*/
+                  - master
+                  - test
+        - erc721test:
+            filters:
+              branches:
+                only:
+                  - /erc721\/.*/
+                  - master
+                  - test
+        - erc20kprove:
+            filters:
+              branches:
+                only:
+                  - /erc20\/.*/
+                  - master
+                  - test
+        - erc721kprove:
+            filters:
+              branches:
+                only:
+                  - /erc721\/.*/
+                  - master
+                  - test
