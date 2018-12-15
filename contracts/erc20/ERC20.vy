@@ -1,31 +1,34 @@
 # @dev Implementation of ERC-20 token standard.
 # @author Ryuya Nakamura (@nrryuya)
 
-Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
-Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256(wei)})
+Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256})
+Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256})
 
 name: public(bytes32)
 symbol: public(bytes32)
 decimals: public(uint256)
-balances: uint256(wei)[address]
-allowances: (uint256(wei)[address])[address]
-total_supply: uint256(wei)
+balances: map(address, uint256)
+allowances: map(address, map(address, uint256))
+total_supply: uint256
+minter: address
 
 @public
-def __init__(_name: bytes32, _symbol: bytes32, _decimals: uint256, _supply: uint256(wei)):
-    _sender: address = msg.sender
+def __init__(_name: bytes32, _symbol: bytes32, _decimals: uint256, _supply: uint256):
+    init_supply: uint256 = _supply * 10 ** _decimals
+    sender: address = msg.sender
     self.name = _name
     self.symbol = _symbol
     self.decimals = _decimals
-    self.balances[_sender] = _supply
-    self.total_supply = _supply
-    log.Transfer(ZERO_ADDRESS, _sender, _supply)
+    self.balances[sender] = init_supply
+    self.total_supply = init_supply
+    self.minter = sender
+    log.Transfer(ZERO_ADDRESS, sender, init_supply)
 
 
 # @dev Total number of tokens in existence.
 @public
 @constant
-def totalSupply() -> uint256(wei):
+def totalSupply() -> uint256:
     return self.total_supply
 
 
@@ -34,7 +37,7 @@ def totalSupply() -> uint256(wei):
 # @return An uint256 representing the amount owned by the passed address.
 @public
 @constant
-def balanceOf(_owner : address) -> uint256(wei):
+def balanceOf(_owner : address) -> uint256:
     return self.balances[_owner]
 
 
@@ -44,7 +47,7 @@ def balanceOf(_owner : address) -> uint256(wei):
 # @return An uint256 specifying the amount of tokens still available for the spender.
 @public
 @constant
-def allowance(_owner : address, _spender : address) -> uint256(wei):
+def allowance(_owner : address, _spender : address) -> uint256:
     return self.allowances[_owner][_spender]
 
 
@@ -52,7 +55,7 @@ def allowance(_owner : address, _spender : address) -> uint256(wei):
 # @param _to The address to transfer to.
 # @param _value The amount to be transferred.
 @public
-def transfer(_to : address, _value : uint256(wei)) -> bool:
+def transfer(_to : address, _value : uint256) -> bool:
     _sender: address = msg.sender
     self.balances[_sender] = self.balances[_sender] - _value
     self.balances[_to] = self.balances[_to] + _value
@@ -67,9 +70,9 @@ def transfer(_to : address, _value : uint256(wei)) -> bool:
 #  @param _to address The address which you want to transfer to
 #  @param _value uint256 the amount of tokens to be transferred
 @public
-def transferFrom(_from : address, _to : address, _value : uint256(wei)) -> bool:
+def transferFrom(_from : address, _to : address, _value : uint256) -> bool:
     _sender: address = msg.sender
-    allowance: uint256(wei) = self.allowances[_from][_sender]
+    allowance: uint256 = self.allowances[_from][_sender]
     self.balances[_from] = self.balances[_from] - _value
     self.balances[_to] = self.balances[_to] + _value
     self.allowances[_from][_sender] = allowance - _value
@@ -85,7 +88,7 @@ def transferFrom(_from : address, _to : address, _value : uint256(wei)) -> bool:
 # @param _spender The address which will spend the funds.
 # @param _value The amount of tokens to be spent.
 @public
-def approve(_spender : address, _value : uint256(wei)) -> bool:
+def approve(_spender : address, _value : uint256) -> bool:
     _sender: address = msg.sender
     self.allowances[_sender][_spender] = _value
     log.Approval(_sender, _spender, _value)
