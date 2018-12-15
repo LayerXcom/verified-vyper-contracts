@@ -45,6 +45,7 @@ workflows:
               branches:
                 only:
                   - /erc20\/.*/
+                  - /all\/.*/
                   - master
                   - kprove_and_test_for_all
         - erc721test:
@@ -52,6 +53,7 @@ workflows:
               branches:
                 only:
                   - /erc721\/.*/
+                  - /all\/.*/
                   - master
                   - kprove_and_test_for_all
         - erc20kprove:
@@ -59,6 +61,7 @@ workflows:
               branches:
                 only:
                   - /erc20\/.*/
+                  - /all\/.*/
                   - master
                   - kprove_and_test_for_all
         - erc721kprove:
@@ -66,5 +69,6 @@ workflows:
               branches:
                 only:
                   - /erc721\/.*/
+                  - /all\/.*/
                   - master
                   - kprove_and_test_for_all
