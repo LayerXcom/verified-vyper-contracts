@@ -1,3 +1,5 @@
+# Copied from: https://github.com/ethereum/vyper/blob/v0.1.0-beta.6/tests/conftest.py
+
 import eth_tester
 import logging
 import pytest
@@ -42,7 +44,7 @@ class VyperMethod(ConciseMethod):
         if not kwargs:
             modifier, modifier_dict = 'call', {}
             fn_abi = [x for x in self._function.contract_abi if x['name'] == self._function.function_identifier].pop()
-            modifier_dict.update({'gas': fn_abi['gas'] + 50000})  # To make tests faster just supply some high gas value.
+            modifier_dict.update({'gas': fn_abi.get('gas', 0) + 50000})  # To make tests faster just supply some high gas value.
         elif len(kwargs) == 1:
             modifier, modifier_dict = kwargs.popitem()
             if modifier not in self.ALLOWED_MODIFIERS:
@@ -74,7 +76,8 @@ def set_evm_verbose_logging():
 
 
 # Useful options to comment out whilst working:
-# set_evm_verbose_logging()
+set_evm_verbose_logging()
+# from vdb import vdb
 # vdb.set_evm_opcode_debugger()
 
 
@@ -168,7 +171,7 @@ def bytes_helper():
 def get_contract_from_lll(w3):
     def lll_compiler(lll, *args, **kwargs):
         lll = optimizer.optimize(LLLnode.from_list(lll))
-        bytecode = compile_lll.assembly_to_evm(compile_lll.compile_to_assembly(lll))
+        bytecode, _ = compile_lll.assembly_to_evm(compile_lll.compile_to_assembly(lll))
         abi = kwargs.get('abi') or []
         contract = w3.eth.contract(bytecode=bytecode, abi=abi)
         deploy_transaction = {
@@ -182,8 +185,9 @@ def get_contract_from_lll(w3):
 
 
 def _get_contract(w3, source_code, *args, **kwargs):
-    abi = compiler.mk_full_signature(source_code)
-    bytecode = '0x' + compiler.compile(source_code).hex()
+    out = compiler.compile_code(source_code, ['abi', 'bytecode'])
+    abi = out['abi']
+    bytecode = out['bytecode']
     contract = w3.eth.contract(abi=abi, bytecode=bytecode)
 
     value = kwargs.pop('value', 0)
@@ -302,3 +306,20 @@ def get_logs(w3):
         logs = c._classic_contract.events[event_name]().processReceipt(tx_receipt)
         return logs
     return get_logs
+
+
+@pytest.fixture
+def search_for_sublist():
+
+    def search_for_sublist(lll, sublist):
+        _list = lll.to_list() if hasattr(lll, 'to_list') else lll
+        if _list == sublist:
+            return True
+        if isinstance(_list, list):
+            for i in _list:
+                ret = search_for_sublist(i, sublist)
+                if ret is True:
+                    return ret
+        return False
+
+    return search_for_sublist
