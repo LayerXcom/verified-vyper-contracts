@@ -5,7 +5,7 @@ specs_dir:=specs
 build_dir:=.build
 
 K_VERSION   :=b65568ade007d54dd21667f4f56f2d7471bb6596
-KEVM_VERSION:=5d3bbb6d9dd3a2913201071937cb3f00d66832b0
+KEVM_VERSION:=0c6c620ef7e84148ce8d63d732317301a66db61c
 
 .PHONY: all clean k kevm clean-kevm
 
@@ -32,7 +32,7 @@ k:
 		&& git reset --hard $(K_VERSION) \
 		&& mvn package -DskipTests
 
-kevm_repo:=https://github.com/kframework/evm-semantics
+kevm_repo:=https://github.com/LayerXcom/evm-semantics.git
 kevm_repo_dir:=$(build_dir)/evm-semantics
 
 kevm:
