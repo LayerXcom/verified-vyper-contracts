@@ -5,7 +5,7 @@ specs_dir:=specs
 build_dir:=.build
 
 K_VERSION   :=b65568ade007d54dd21667f4f56f2d7471bb6596
-KEVM_VERSION:=0c6c620ef7e84148ce8d63d732317301a66db61c
+KEVM_VERSION:=75146083d9e97f6a4812a97378d3cdac031eb42e
 
 .PHONY: all clean k kevm clean-kevm
 
