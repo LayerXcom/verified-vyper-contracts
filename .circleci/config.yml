@@ -36,6 +36,15 @@ jobs:
           path: ~/verified-vyper-contracts
       - run: ./test.sh erc721
 
+  builtinskprove:
+    working_directory: ~/verified-vyper-contracts/k
+    docker:
+      - image: ubuntu:18.04
+    steps:
+      - checkout:
+          path: ~/verified-vyper-contracts
+      - run: ./test.sh built-ins
+
 workflows:
     version: 2
     build:
@@ -66,5 +75,12 @@ workflows:
               branches:
                 only:
                   - /erc721\/.*/
+                  - /all\/.*/
+                  - master
+        - builtinskprove:
+            filters:
+              branches:
+                only:
+                  - /built-ins\/.*/
                   - /all\/.*/
                   - master

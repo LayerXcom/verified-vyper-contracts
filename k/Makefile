@@ -92,7 +92,6 @@ erc721_files:=balanceOf-success-spec.k \
 			  ownerOf-failure-spec.k \
 			  getApproved-success-spec.k \
 			  getApproved-failure-spec.k \
-			  isApprovedForAll-spec.k \
 			  isApprovedForAll-spec.k
  			#   transferFrom-success-1-spec.k \
 			#   transferFrom-success-2-spec.k \
@@ -109,6 +108,22 @@ erc721_tmpls:=erc721/module-tmpl.k erc721/spec-tmpl.k
 	python3 resources/gen-spec.py $^ $* $* > $@
 	cp erc721/abstract-semantics.k $(dir $@)
 	cp erc721/verification.k $(dir $@)
+
+# Built-ins
+built-ins_files:=clearInt128Storage-spec.k \
+				 clearUInt256Storage-spec.k
+
+built-ins: $(patsubst %, $(specs_dir)/built-ins/%, $(built-ins_files)) $(specs_dir)/lemmas.k
+
+built-ins_tmpls:=built-ins/module-tmpl.k built-ins/spec-tmpl.k
+
+ $(specs_dir)/built-ins/%-spec.k: $(built-ins_tmpls) built-ins/built-ins-spec.ini
+	@echo >&2 "==  gen-spec: $@"
+	mkdir -p $(dir $@)
+	python3 resources/gen-spec.py $^ $* $* > $@
+	cp built-ins/abstract-semantics.k $(dir $@)
+	cp built-ins/verification.k $(dir $@)
+
 
 # Testing
 # -------
