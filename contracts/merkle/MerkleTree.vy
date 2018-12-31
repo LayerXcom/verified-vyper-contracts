@@ -35,7 +35,7 @@ def calcMerkleRoot(_leaf: bytes32, _index: uint256, _proof: bytes32[16]) -> byte
     @param _proof A Merkle proof demonstrating membership of the leaf hash.
     @return bytes32 Computed root of the Merkle tree.
     """
-    return calcMerkleRoot(_leaf, _index, _proof)
+    return self._calcMerkleRoot(_leaf, _index, _proof)
 
 
 @public
@@ -49,4 +49,4 @@ def verifyMerkleProof(_leaf: bytes32, _index: uint256, _rootHash: bytes32, _proo
     @param _proof A Merkle proof demonstrating membership of the leaf hash.
     @return bool whether the leaf hash is in the Merkle tree.
     """
-    return computedHash == _rootHash
+    return self._calcMerkleRoot(_leaf, _index, _proof) == _rootHash
