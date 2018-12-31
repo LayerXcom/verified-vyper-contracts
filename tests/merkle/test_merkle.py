@@ -3,6 +3,7 @@ from web3 import Web3
 
 NULL_BYTE = b'\x00'
 NULL_HASH = NULL_BYTE * 32
+WRONG_HASH = b'\x01' * 32
 TREE_DEPTH = 16
 
 
@@ -53,10 +54,10 @@ def test_verifyMerkleProof(c):
     assert not c.verifyMerkleProof(hashed_test_leaf, test_index + 1, merkle.root, proof, call={"gas": 100000})
 
     # Returns False if the root hash is wrong
-    assert not c.verifyMerkleProof(hashed_test_leaf, test_index, NULL_BYTE, proof, call={"gas": 100000})
+    assert not c.verifyMerkleProof(hashed_test_leaf, test_index, WRONG_HASH, proof, call={"gas": 100000})
 
     # Returns False if the proof is wrong
-    assert not c.verifyMerkleProof(hashed_test_leaf, test_index, merkle.root, [NULL_BYTE] * TREE_DEPTH, call={"gas": 100000})
+    assert not c.verifyMerkleProof(hashed_test_leaf, test_index, merkle.root, [WRONG_HASH] * TREE_DEPTH, call={"gas": 100000})
 
 
 # These are modified from OmiseGo's work: 
