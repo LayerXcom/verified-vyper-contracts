@@ -1,6 +1,6 @@
 # FVyper
 [![CircleCI](https://circleci.com/gh/LayerXcom/verified-vyper-contracts.svg?style=svg)](https://circleci.com/gh/LayerXcom/verified-vyper-contracts)  
-A collection of useful Vyper conracts developed with formal methods  
+A collection of useful Vyper contracts developed with formal methods  
 
 ## Directory structure
 The `/contracts` directory contains vyper contracts we use in formal verification (`/k` directory) and unit testing ( `/tests` directory).
