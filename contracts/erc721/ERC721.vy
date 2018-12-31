@@ -273,7 +273,7 @@ def safeTransferFrom(
     @param _data Additional data with no specified format, sent in call to `_to`.
     """
     self._transferFrom(_from, _to, _tokenId, msg.sender)
-    if(_to.codesize > 0): # check if `_to` is a contract address
+    if _to.is_contract: # check if `_to` is a contract address
         returnValue: bytes32 = ERC721Receiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data)
         assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
 
