@@ -54,6 +54,15 @@ jobs:
           path: ~/verified-vyper-contracts
       - run: ./test.sh merkle
 
+  ecdsatest:
+    working_directory: ~/verified-vyper-contracts/tests
+    docker:
+      - image: python:3.6.7
+    steps:
+      - checkout:
+          path: ~/verified-vyper-contracts
+      - run: ./test.sh ecdsa
+
 
 workflows:
     version: 2
@@ -99,5 +108,12 @@ workflows:
               branches:
                 only:
                   - /merkle\/.*/
+                  - /all\/.*/
+                  - master
+        - ecdsatest:
+            filters:
+              branches:
+                only:
+                  - /ecdsa\/.*/
                   - /all\/.*/
                   - master
