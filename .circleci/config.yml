@@ -45,6 +45,16 @@ jobs:
           path: ~/verified-vyper-contracts
       - run: ./test.sh built-ins
 
+  merkletest:
+    working_directory: ~/verified-vyper-contracts/tests
+    docker:
+      - image: python:3.6.7
+    steps:
+      - checkout:
+          path: ~/verified-vyper-contracts
+      - run: ./test.sh merkle
+
+
 workflows:
     version: 2
     build:
@@ -82,5 +92,12 @@ workflows:
               branches:
                 only:
                   - /built-ins\/.*/
+                  - /all\/.*/
+                  - master
+        - merkletest:
+            filters:
+              branches:
+                only:
+                  - /merkle\/.*/
                   - /all\/.*/
                   - master
