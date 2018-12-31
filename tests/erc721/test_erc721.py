@@ -42,7 +42,7 @@ def test_ownerOf(c, w3, assert_tx_failed):
     assert_tx_failed(lambda: c.ownerOf(INVALID_TOKEN_ID))
 
 
-def test_getApproved(c, w3, assert_tx_failed):
+def test_getApproved(c, w3):
     someone, operator = w3.eth.accounts[1:3]
 
     assert c.getApproved(SOMEONE_TOKEN_IDS[0]) is None
