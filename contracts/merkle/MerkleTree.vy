@@ -7,11 +7,10 @@ def _calcMerkleRoot(_leaf: bytes32, _index: uint256, _proof: bytes32[16]) -> byt
     """
     @dev Compute the merkle root
     @param _leaf Leaf hash to verify.
-    @param _index Position of the leaf hash in the Merkle tree, which starts with 1.
+    @param _index Position of the leaf hash in the Merkle tree.
     @param _proof A Merkle proof demonstrating membership of the leaf hash.
     @return bytes32 Computed root of the Merkle tree.
     """
-    proofElement: bytes32
     computedHash: bytes32 = _leaf
     index: uint256 = _index
 
