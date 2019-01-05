@@ -18,7 +18,7 @@ G = 3
 def c(get_contract):
     with open('../contracts/accumulator/RSAAccumulator.vy') as f:
         code = f.read()
-    # eth.exceptions.OutOfGas: Contract code size exceeds EIP170 limit of 24577.  Got code of size: 51062
+    # eth.exceptions.OutOfGas: Contract code size exceeds EIP170 limit of 24577.
     c = get_contract(code, N)
     return c
 
