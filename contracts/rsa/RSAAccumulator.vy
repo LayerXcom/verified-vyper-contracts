@@ -177,10 +177,25 @@ def _modularMulBy4(_a: uint256[8], _m: uint256[8]) -> uint256[8]:
 
 ### ACCUMULATOR FUNCTIONS ###
 
+@private
+@constant
+def _initialAccumulator() -> uint256[8]:
+    initA: uint256[8]
+    initA[8 - 1] = G
+    return initA
+
+@private
+@constant
+def _isPrime(_inp: uint256) -> bool:
+    # TODO: Implementation!
+    return True
+
+
 @public
 def __init__(_N: uint256[8]):
     self.N = _N
-    self.accumulator[8 - 1] = G
+    self.accumulator = self._initialAccumulator()
+
 
 @public
 def updateAccumulator(_value: uint256):
@@ -190,18 +205,10 @@ def updateAccumulator(_value: uint256):
 def updateAccumulatorMultiple(_limbs: uint256[8]):
     self.accumulator = self._modularExpVariableLength(self.accumulator, _limbs, self.N)
 
-@private
-@constant
-def _initialAccumulator() -> uint256[8]:
-    initA: uint256[8]
-    initA[8 - 1] = G
-    return initA
-
 # check that (g^w)^x = A
-# assume that all primes are valid, etc
 @public
 def checkInclusionProof(_prime: uint256, _witnessLimbs: uint256[8]) -> bool:
-    assert _prime < 2 ** 64
+    assert self._isPrime(_prime)
     Nread: uint256[8] = self.N
     lhs: uint256[8] = self._modularExpVariableLength(self._initialAccumulator(), _witnessLimbs, Nread)
     lhs = self._modularExp(lhs, _prime, Nread)
@@ -210,11 +217,10 @@ def checkInclusionProof(_prime: uint256, _witnessLimbs: uint256[8]) -> bool:
     return True
 
 # check that A*(g^r) = g^(x1*x2*...*xn)^cofactor
-# assume that all primes are valid, etc
 @public
 def checkNonInclusionProof(_primes: uint256[8], _rLimbs: uint256[8], _cofactorLimbs: uint256[8]) -> bool:
     for p in _primes:
-        assert p < 2 ** 64
+        assert self._isPrime(p)
     Nread: uint256[8] = self.N
     lhs: uint256[8] = self._modularExpVariableLength(self._initialAccumulator(), _rLimbs, Nread)
     lhs = self._modularMul4(lhs, self.accumulator, Nread)
