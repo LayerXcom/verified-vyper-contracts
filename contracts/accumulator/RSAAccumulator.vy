@@ -194,7 +194,8 @@ def updateAccumulatorMultiple(_limbs: uint256[8]):
 
 @private
 @constant
-def _isPrime(_inp: uint256) -> bool:
+def _isPrime(_num: uint256) -> bool:
+    assert _num < 2 ** 64
     # TODO: Implementation!
     return True
 
@@ -221,8 +222,7 @@ def checkNonInclusionProof(_primes: uint256[8], _rLimbs: uint256[8], _cofactorLi
     multiplicationResult: uint256 = 1
     rhs: uint256[8] = self._modularExpVariableLength(self.g, _cofactorLimbs, Nread)
     for i in range(2): # 2 = M_LIST_LENGTH / 4
-        # NOTE: * -> + ?
-        multiplicationResult = _primes[4 * i] * _primes[4 * i + 1] + _primes[4 * i + 2] + _primes[4 * i + 3]
+        multiplicationResult = _primes[4 * i] * _primes[4 * i + 1] * _primes[4 * i + 2] * _primes[4 * i + 3]
         rhs = self._modularExp(rhs, multiplicationResult, Nread)
     rhs = self._modularMulBy4(rhs, Nread)
     # extra factor of 4 on LHS is compensated
