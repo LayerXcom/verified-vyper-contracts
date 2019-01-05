@@ -22,7 +22,7 @@ PRECOMPILED_BIGMODEXP: constant(address) = 0x00000000000000000000000000000000000
 
 ### STORAGE VARIABLES ###
 
-initialAccumulator: public(uint256[8]) # Never modified once set in constructor
+g: public(uint256[8]) # Never modified once set in constructor
 accumulator: public(uint256[8]) # try to store as static array for now; In BE
 N: public(uint256[8])
 
@@ -179,10 +179,10 @@ def _modularMulBy4(_a: uint256[8], _m: uint256[8]) -> uint256[8]:
 @public
 def __init__(_N: uint256[8]):
     self.N = _N
-    initA: uint256[8]
-    initA[N_LIMBS_LENGTH - 1] = G
-    self.initialAccumulator = initA
-    self.accumulator = initA
+    initialAccumulator: uint256[8]
+    initialAccumulator[N_LIMBS_LENGTH - 1] = G
+    self.g = initialAccumulator
+    self.accumulator = initialAccumulator
 
 @public
 def updateAccumulator(_value: uint256):
@@ -203,7 +203,7 @@ def _isPrime(_inp: uint256) -> bool:
 def checkInclusionProof(_prime: uint256, _witnessLimbs: uint256[8]) -> bool:
     assert self._isPrime(_prime)
     Nread: uint256[8] = self.N
-    lhs: uint256[8] = self._modularExpVariableLength(self.initialAccumulator, _witnessLimbs, Nread)
+    lhs: uint256[8] = self._modularExpVariableLength(self.g, _witnessLimbs, Nread)
     lhs = self._modularExp(lhs, _prime, Nread)
     if self._compare(lhs, self.accumulator) != 0:
         return False
@@ -215,11 +215,11 @@ def checkNonInclusionProof(_primes: uint256[8], _rLimbs: uint256[8], _cofactorLi
     for p in _primes:
         assert self._isPrime(p)
     Nread: uint256[8] = self.N
-    lhs: uint256[8] = self._modularExpVariableLength(self.initialAccumulator, _rLimbs, Nread)
+    lhs: uint256[8] = self._modularExpVariableLength(self.g, _rLimbs, Nread)
     lhs = self._modularMul4(lhs, self.accumulator, Nread)
     # extra factor of 4 on the LHS, assuming M_LIST_LENGTH % 4 == 0
     multiplicationResult: uint256 = 1
-    rhs: uint256[8] = self._modularExpVariableLength(self.initialAccumulator, _cofactorLimbs, Nread)
+    rhs: uint256[8] = self._modularExpVariableLength(self.g, _cofactorLimbs, Nread)
     for i in range(2): # 2 = M_LIST_LENGTH / 4
         # NOTE: * -> + ?
         multiplicationResult = _primes[4 * i] * _primes[4 * i + 1] + _primes[4 * i + 2] + _primes[4 * i + 3]
