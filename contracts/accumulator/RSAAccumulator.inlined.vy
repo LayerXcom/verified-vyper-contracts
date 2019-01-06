@@ -29,25 +29,6 @@ N: public(uint256[8])
 
 ### BIG INTEGER ARITHMETIC FUNCTIONS ###
 
-@private
-@constant
-def _convertUInt256ListToBytes(_inp: uint256[8]) -> bytes[256]:
-    # FIXME: Make it more simple when conversion to bytes is supported:
-    #        https://github.com/ethereum/vyper/issues/1093
-    tmp: bytes32[8]
-    for i in range(M_LIST_LENGTH):
-        tmp[i] = convert(_inp[i], bytes32)
-    return concat(tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5], tmp[6], tmp[7])
-
-@private
-@constant
-def _convertBytesArrayToUInt256List(_inp: bytes[256]) -> uint256[8]:
-    out: uint256[8]
-    for i in range(M_LIST_LENGTH):
-        out[i] = convert(extract32(_inp, i * 32, type=bytes32), uint256)
-    return out
-
-
 # this assumes that exponent in never larger than 256 bits
 @private
 def _modularExp(_base: uint256[8], _e: uint256, _m: uint256[8]) -> uint256[8]:
