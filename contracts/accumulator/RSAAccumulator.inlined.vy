@@ -30,7 +30,7 @@ N: public(uint256[8])
 ### BIG INTEGER ARITHMETIC FUNCTIONS ###
 
 # this assumes that exponent in never larger than 256 bits
-@private
+@public
 def _modularExp(_base: uint256[8], _e: uint256, _m: uint256[8]) -> uint256[8]:
     e: uint256[8]
     e[M_LIST_LENGTH - 1] = _e
@@ -60,7 +60,7 @@ def _modularExp(_base: uint256[8], _e: uint256, _m: uint256[8]) -> uint256[8]:
     return out
 
 
-@private
+@public
 def _modularExpVariableLength(_base: uint256[8], _e: uint256[8], _m: uint256[8]) -> uint256[8]:
     tmp: bytes32[8]
     for i in range(M_LIST_LENGTH):
