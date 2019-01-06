@@ -2,6 +2,7 @@
 # @author Ryuya Nakamura (@nrryuya)
 # Based on The Matter team's work:
 # https://github.com/matterinc/RSAAccumulator/blob/master/contracts/RSAAccumulator.sol
+# FIXME: This contract can't be deployed due to the excess of the code size (EIP170)
 
 ### CONSTANTS ###
 # FIXME: The sizes of arrays in this file should be replaced with these constants:
