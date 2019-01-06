@@ -139,17 +139,7 @@ def _wrappingAdd(_a: uint256[8], _b: uint256[8]) -> uint256[8]:
             o[j] = subaddition
     return o
 
-@private
-@constant
-def _compare(_a: uint256[8], _b: uint256[8]) -> int128:
-    for i in range(M_LIST_LENGTH):
-        if _a[i] > _b[i]:
-            return 1
-        elif _a[i] < _b[i]:
-            return -1
-    return 0
-
-@private
+@public
 @constant
 def _modularSub(_a: uint256[8], _b: uint256[8], _m: uint256[8]) -> uint256[8]:
     o: uint256[8]
@@ -170,7 +160,7 @@ def _modularSub(_a: uint256[8], _b: uint256[8], _m: uint256[8]) -> uint256[8]:
         tmp: uint256[8] = self._wrappingSub(_b, _a)
         return self._wrappingSub(_m, tmp)
 
-@private
+@public
 @constant
 def _modularAdd(_a: uint256[8], _b: uint256[8], _m: uint256[8]) -> uint256[8]:
     space: uint256[8] = self._wrappingSub(_m, _a)
@@ -191,12 +181,14 @@ def _modularAdd(_a: uint256[8], _b: uint256[8], _m: uint256[8]) -> uint256[8]:
     else:
         return self._wrappingSub(_b, space)
 
+# NOTE: Removing _modularMul4 increases the code size.
 @private
 def _modularMul4(_a: uint256[8], _b: uint256[8], _m: uint256[8]) -> uint256[8]:
     aPlusB: uint256[8] = self._modularExp(self._modularAdd(_a, _b, _m), 2, _m)
     aMinusB: uint256[8] = self._modularExp(self._modularSub(_a, _b, _m), 2, _m)
     return self._modularSub(aPlusB, aMinusB, _m)
 
+# NOTE: Removing _modularMulBy4 increases the code size.
 # cheat and just do two additions
 @private
 @constant
