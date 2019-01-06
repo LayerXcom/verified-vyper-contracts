@@ -153,7 +153,15 @@ def _compare(_a: uint256[8], _b: uint256[8]) -> int128:
 @constant
 def _modularSub(_a: uint256[8], _b: uint256[8], _m: uint256[8]) -> uint256[8]:
     o: uint256[8]
-    comparison: int128 = self._compare(_a, _b)
+
+    # comparison: int128 = self._compare(_a, _b)
+    comparison: int128 = 0
+    for i in range(M_LIST_LENGTH):
+        if _a[i] > _b[i]:
+            comparison = 1
+        elif _a[i] < _b[i]:
+            comparison = -1
+
     if comparison == 0:
         return o
     elif comparison == 1:
@@ -167,7 +175,15 @@ def _modularSub(_a: uint256[8], _b: uint256[8], _m: uint256[8]) -> uint256[8]:
 def _modularAdd(_a: uint256[8], _b: uint256[8], _m: uint256[8]) -> uint256[8]:
     space: uint256[8] = self._wrappingSub(_m, _a)
     o: uint256[8]
-    comparison: int128 = self._compare(_a, _b)
+
+    # comparison: int128 = self._compare(_a, _b)
+    comparison: int128 = 0
+    for i in range(M_LIST_LENGTH):
+        if _a[i] > _b[i]:
+            comparison = 1
+        elif _a[i] < _b[i]:
+            comparison = -1
+
     if comparison == 0:
         return o
     elif comparison == 1:
@@ -221,7 +237,15 @@ def checkInclusionProof(_prime: uint256, _witnessLimbs: uint256[8]) -> bool:
     Nread: uint256[8] = self.N
     lhs: uint256[8] = self._modularExpVariableLength(self.g, _witnessLimbs, Nread)
     lhs = self._modularExp(lhs, _prime, Nread)
-    if self._compare(lhs, self.accumulator) != 0:
+
+    comparison: int128 = 0
+    for i in range(M_LIST_LENGTH):
+        if lhs[i] > self.accumulator[i]:
+            comparison = 1
+        elif lhs[i] < self.accumulator[i]:
+            comparison = -1
+
+    if comparison != 0:
         return False
     return True
 
@@ -241,6 +265,14 @@ def checkNonInclusionProof(_primes: uint256[8], _rLimbs: uint256[8], _cofactorLi
         rhs = self._modularExp(rhs, multiplicationResult, Nread)
     rhs = self._modularMulBy4(rhs, Nread)
     # extra factor of 4 on LHS is compensated
-    if self._compare(lhs, rhs) != 0:
+
+    comparison: int128 = 0
+    for i in range(M_LIST_LENGTH):
+        if lhs[i] > rhs[i]:
+            comparison = 1
+        elif lhs[i] < rhs[i]:
+            comparison = -1
+
+    if comparison != 0:
         return False
     return True
