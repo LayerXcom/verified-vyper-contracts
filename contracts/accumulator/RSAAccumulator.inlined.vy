@@ -87,7 +87,7 @@ def _modularExpVariableLength(_base: uint256[8], _e: uint256[8], _m: uint256[8])
     return out
 
 
-@private
+@public
 @constant
 def _wrappingSub(_a: uint256[8], _b: uint256[8]) -> uint256[8]:
     borrow: bool = False
@@ -112,7 +112,7 @@ def _wrappingSub(_a: uint256[8], _b: uint256[8]) -> uint256[8]:
             o[j] = limb - _b[j]
     return o
 
-@private
+@public
 @constant
 def _wrappingAdd(_a: uint256[8], _b: uint256[8]) -> uint256[8]:
     carry: bool = False
