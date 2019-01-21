@@ -8,6 +8,8 @@
 @constant
 def _isPrime(_num: uint256) -> bool:
     assert _num < 2 ** 64
+    if _num < 2:
+        return False
     det: uint256 = 2<<(_num-2)
     if det % _num == 1:
         return True
