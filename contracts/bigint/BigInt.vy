@@ -154,14 +154,28 @@ def _modularAdd(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint
 
 ### PUBLIC FUNCTIONS ###
 @public
+@constant
+def modularAdd(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
+    return self._modularAdd(_a, _b, _m)
+
+
+@public
+@constant
+def modularSub(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
+    return self._modularSub(_a, _b, _m)
+
+
+@public
 def modularExp(_base: uint256[M_LIST_LENGTH], _e: uint256, _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
     e: uint256[M_LIST_LENGTH]
     e[M_LIST_LENGTH - 1] = _e
     return self._bigModExp(_base, e, _m)
 
+
 @public
 def modularExpVariableLength(_base: uint256[M_LIST_LENGTH], _e: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
     return self._bigModExp(_base, _e, _m)
+
 
 # 4ab = (a + b)^2 - (a - b)^2
 @public
@@ -171,6 +185,7 @@ def modularMul4(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint
     aPlusB: uint256[M_LIST_LENGTH] = self._bigModExp(self._modularAdd(_a, _b, _m), two, _m)
     aMinusB: uint256[M_LIST_LENGTH] = self._bigModExp(self._modularSub(_a, _b, _m), two, _m)
     return self._modularSub(aPlusB, aMinusB, _m)
+
 
 # 4a = (a + a) + (a + a)
 @public
