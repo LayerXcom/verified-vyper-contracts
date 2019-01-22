@@ -82,27 +82,27 @@ workflows:
                   - /erc721\/.*/
                   - /all\/.*/
                   - master
-        - erc20kprove:
-            filters:
-              branches:
-                only:
-                  - /erc20\/.*/
-                  - /all\/.*/
-                  - master
-        - erc721kprove:
-            filters:
-              branches:
-                only:
-                  - /erc721\/.*/
-                  - /all\/.*/
-                  - master
-        - builtinskprove:
-            filters:
-              branches:
-                only:
-                  - /built-ins\/.*/
-                  - /all\/.*/
-                  - master
+        # - erc20kprove:
+        #     filters:
+        #       branches:
+        #         only:
+        #           - /erc20\/.*/
+        #           - /all\/.*/
+        #           - master
+        # - erc721kprove:
+        #     filters:
+        #       branches:
+        #         only:
+        #           - /erc721\/.*/
+        #           - /all\/.*/
+        #           - master
+        # - builtinskprove:
+        #     filters:
+        #       branches:
+        #         only:
+        #           - /built-ins\/.*/
+        #           - /all\/.*/
+        #           - master
         - merkletest:
             filters:
               branches:
