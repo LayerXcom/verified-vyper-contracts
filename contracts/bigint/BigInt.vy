@@ -53,25 +53,29 @@ def _bigModExp(_base: uint256[M_LIST_LENGTH], _e: uint256[M_LIST_LENGTH], _m: ui
 @private
 @constant
 def _wrappingSub(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
+    """
+    Assumes _a > _b, otherwise returns _a - _b + 2 ** (256 * M_LIST_LENGTH)(finishes with borrow = True)
+    Assumes _a - _b < _m, otherwise the output is larger or equal to _m
+    """
     borrow: bool = False
     limb: uint256 = 0
     o: uint256[M_LIST_LENGTH]
     for i in range(M_LIST_LENGTH):
-        j: int128 = M_LIST_LENGTH - i
+        j: int128 = M_LIST_LENGTH - 1 - i
         limb = _a[j]
         if borrow:
             if limb == 0:
                 borrow = True
-                limb -= 1
-                o[j] = limb - _b[j]
+                o[j] = MAX_UINT256 - _b[j]
+                continue
             else:
                 limb -= 1
-                if limb >= _b[j]:
-                    borrow = False
-                o[j] = limb - _b[j]
-        else:
-            if limb < _b[j]:
-                borrow = True
+        if limb < _b[j]:
+            borrow = True
+            # 2 ** 256 - diff
+            o[j] = MAX_UINT256 - (_b[j] - limb) + 1
+        else: 
+            borrow = False
             o[j] = limb - _b[j]
     return o
 
@@ -79,36 +83,39 @@ def _wrappingSub(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH]) -> uint
 @private
 @constant
 def _wrappingAdd(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
+    """
+    Assumes _a + _b < _m, otherwise the output is larger or equal to _m
+    """
     carry: bool = False
     limb: uint256 = 0
     subaddition: uint256 = 0
     o: uint256[M_LIST_LENGTH]
     for i in range(M_LIST_LENGTH):
-        j: int128 = M_LIST_LENGTH - i
+        j: int128 = M_LIST_LENGTH - 1 - i
         limb = _a[j]
         if carry:
-            if limb == 0:
+            if limb == MAX_UINT256: # NOTE: The original seems wrong here.
                 carry = True
                 o[j] = _b[j]
+                continue
             else:
                 limb += 1
-                subaddition = limb + _b[j]
-                if subaddition >= limb:
-                    carry = False
-                o[j] = subaddition
+        if limb > MAX_UINT256 - _b[j]:
+            carry = True
+            o[j] = limb - (MAX_UINT256 - _b[j] + 1)
         else:
-            subaddition = limb + _b[j]
-            if subaddition < limb:
-                carry = True
-            o[j] = subaddition
+            carry = False
+            o[j] = limb + _b[j]
     return o
 
 
 @private
 @constant
 def _modularSub(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
-    o: uint256[M_LIST_LENGTH]
-
+    """
+    Assumes _a - _b < _m, otherwise the output is larger or equal to _m
+    Assumes _b - _a < _m, otherwise returns _m - (_b - _a) + 2 ** (256 * M_LIST_LENGTH) when _a < _b
+    """
     # Comparison (inlined for code size reduction)
     comparison: int128
     for i in range(M_LIST_LENGTH):
@@ -119,11 +126,12 @@ def _modularSub(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint
         else:
             comparison = 0
 
-    if comparison == 0:
+    if comparison == 0: # _a = _b
+        o: uint256[M_LIST_LENGTH]
         return o
-    elif comparison == 1:
+    elif comparison == 1: # _a > _b
         return self._wrappingSub(_a, _b)
-    else:
+    else: # _a < _b
         tmp: uint256[M_LIST_LENGTH] = self._wrappingSub(_b, _a)
         return self._wrappingSub(_m, tmp)
 
@@ -131,39 +139,33 @@ def _modularSub(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint
 @private
 @constant
 def _modularAdd(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
+    """
+    Assumes _a <= _m, otherwise space = _m - _a + 2 ** (256 * M_LIST_LENGTH)
+    Assumes _a + _b <= 2 * _m? (otherwise _b - space >= _m) when space < _b
+    """
+    # See how much "space" has left before an overflow
     space: uint256[M_LIST_LENGTH] = self._wrappingSub(_m, _a)
-    o: uint256[M_LIST_LENGTH]
-
+    
     # Comparison (inlined for code size reduction)
     comparison: int128
     for i in range(M_LIST_LENGTH):
-        if _a[i] > _b[i]:
+        if space[i] > _b[i]:
             comparison = 1
-        elif _a[i] < _b[i]:
+        elif space[i] < _b[i]:
             comparison = -1
         else:
             comparison = 0
 
-    if comparison == 0:
+    if comparison == 0: # space = _b
+        o: uint256[M_LIST_LENGTH]
         return o
-    elif comparison == 1:
+    elif comparison == 1: # space > _b
         return self._wrappingAdd(_a, _b)
-    else:
+    else: # space < _b
         return self._wrappingSub(_b, space)
 
 
 ### PUBLIC FUNCTIONS ###
-@public
-@constant
-def modularAdd(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
-    return self._modularAdd(_a, _b, _m)
-
-
-@public
-@constant
-def modularSub(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
-    return self._modularSub(_a, _b, _m)
-
 
 @public
 def modularExp(_base: uint256[M_LIST_LENGTH], _e: uint256, _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
@@ -177,7 +179,7 @@ def modularExpVariableLength(_base: uint256[M_LIST_LENGTH], _e: uint256[M_LIST_L
     return self._bigModExp(_base, _e, _m)
 
 
-# 4ab = (a + b)^2 - (a - b)^2
+# 4ab = (a + b)**2 - (a - b)**2
 @public
 def modularMul4(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
     two: uint256[M_LIST_LENGTH]
@@ -193,3 +195,17 @@ def modularMul4(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint
 def modularMulBy4(_a: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
     t: uint256[M_LIST_LENGTH] = self._modularAdd(_a, _a, _m)
     return self._modularAdd(t, t, _m)
+
+
+# NOTE: modularAdd and modularSub are commented out here due to the code size issue (EIP170).
+#       When you use them, remove other public functions instead to reduce the code size.
+# @public
+# @constant
+# def modularAdd(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
+#     return self._modularAdd(_a, _b, _m)
+
+
+# @public
+# @constant
+# def modularSub(_a: uint256[M_LIST_LENGTH], _b: uint256[M_LIST_LENGTH], _m: uint256[M_LIST_LENGTH]) -> uint256[M_LIST_LENGTH]:
+#     return self._modularSub(_a, _b, _m)
