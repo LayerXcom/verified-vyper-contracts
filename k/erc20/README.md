@@ -4,7 +4,7 @@ The code in this directory aims at the creation of an [ERC20](https://github.com
 The code is based on [the test contracts](https://github.com/Uniswap/contracts-vyper/blob/master/contracts/test_contracts/ERC20.vy) in Uniswap project.
 
 ## Vyper Version
-`0.1.0b6`
+`0.1.0b7`
 
 ## Verification
 We verified runtime bytecode compiled with this command.
