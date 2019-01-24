@@ -63,6 +63,14 @@ jobs:
           path: ~/verified-vyper-contracts
       - run: ./test.sh ecdsa
 
+  biginttest:
+    working_directory: ~/verified-vyper-contracts/tests
+    docker:
+      - image: python:3.6.7
+    steps:
+      - checkout:
+          path: ~/verified-vyper-contracts
+      - run: ./test.sh bigint
 
 workflows:
     version: 2
@@ -115,5 +123,12 @@ workflows:
               branches:
                 only:
                   - /ecdsa\/.*/
+                  - /all\/.*/
+                  - master
+        - biginttest:
+            filters:
+              branches:
+                only:
+                  - /bigint\/.*/
                   - /all\/.*/
                   - master
