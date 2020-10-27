@@ -5,7 +5,7 @@ attrs==18.2.0
 certifi==2018.10.15
 cffi==1.11.5
 chardet==3.0.4
-cryptography==2.4.2
+cryptography==3.2
 cytoolz==0.9.0.1
 eth-abi==1.2.2
 eth-account==0.3.0
